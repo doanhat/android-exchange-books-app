@@ -1,0 +1,76 @@
+{
+  "project_info": {
+    "project_number": "831214005278",
+    "project_id": "nf28-donpoly",
+    "storage_bucket": "nf28-donpoly.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:831214005278:android:dc6d068545997e7004920f",
+        "android_client_info": {
+          "package_name": "com.example.donpoly"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "831214005278-ihij90b97bsp8ni1ohaidh8cf37jlf7p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBk39e8qmh0L3PqQ3beE1fF-IrAthruaMs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "831214005278-ihij90b97bsp8ni1ohaidh8cf37jlf7p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:831214005278:android:ea1dca9fbe798ea304920f",
+        "android_client_info": {
+          "package_name": "com.openclassrooms.firebaseoc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "831214005278-6o143hgl9o1q5spclktrqok7lnp6m53u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.openclassrooms.firebaseoc",
+            "certificate_hash": "460d8fa8289f3121603b6fe150b7cd8646bf8ebe"
+          }
+        },
+        {
+          "client_id": "831214005278-ihij90b97bsp8ni1ohaidh8cf37jlf7p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBk39e8qmh0L3PqQ3beE1fF-IrAthruaMs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "831214005278-ihij90b97bsp8ni1ohaidh8cf37jlf7p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

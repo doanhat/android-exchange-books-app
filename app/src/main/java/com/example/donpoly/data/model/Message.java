@@ -1,34 +1,42 @@
 package com.example.donpoly.data.model;
 
+import com.google.firebase.database.IgnoreExtraProperties;
+
+import java.util.UUID;
+
+@IgnoreExtraProperties
 public class Message {
-    private LoggedInUser sender;
-    private LoggedInUser receiver;
+    private String id;
+    private User sender;
+    private User receiver;
     private String content;
     private String time;
 
-    public Message(LoggedInUser sender, LoggedInUser receiver, String content, String time) {
+    public Message(String id, User sender, User receiver, String content, String time) {
+        this.id = UUID.randomUUID().toString();
         this.sender = sender;
         this.receiver = receiver;
         this.content = content;
         this.time = time;
     }
 
-    public Message() {
+    public Message(String id) {
+        this.id = UUID.randomUUID().toString();
     }
 
-    public LoggedInUser getSender() {
+    public User getSender() {
         return sender;
     }
 
-    public void setSender(LoggedInUser sender) {
+    public void setSender(User sender) {
         this.sender = sender;
     }
 
-    public LoggedInUser getReceiver() {
+    public User getReceiver() {
         return receiver;
     }
 
-    public void setReceiver(LoggedInUser receiver) {
+    public void setReceiver(User receiver) {
         this.receiver = receiver;
     }
 

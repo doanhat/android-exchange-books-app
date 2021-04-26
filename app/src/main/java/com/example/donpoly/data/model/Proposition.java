@@ -1,8 +1,15 @@
 package com.example.donpoly.data.model;
 
 import com.example.donpoly.data.tools.Status;
+import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.UUID;
+
+@IgnoreExtraProperties
 public class Proposition {
+    private String id;
     private String title;
     private Status status;
     private String description;
@@ -23,9 +30,28 @@ public class Proposition {
         this.exchangeable = exchangeable;
         this.author = author;
         this.taker = taker;
+        this.id = UUID.randomUUID().toString();
     }
 
     public Proposition() {
+        this.title = "title";
+        this.status = Status.ACCEPTABLE;
+        this.description = "description";
+        this.postedDay = "12/12/2021";
+        this.validDay = "12/12/2021";
+        this.price = 5;
+        this.exchangeable = true;
+        this.author = null;
+        this.taker = null;
+        this.id = UUID.randomUUID().toString();
+    }
+
+    public static ArrayList<Proposition> createDummies(int i) {
+        ArrayList<Proposition> lProps = new ArrayList<>();
+        for (int j = 0; j < i; j++) {
+            lProps.add(new Proposition());
+        }
+        return lProps;
     }
 
 
@@ -100,4 +126,14 @@ public class Proposition {
     public void setTaker(LoggedInUser taker) {
         this.taker = taker;
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+
 }
