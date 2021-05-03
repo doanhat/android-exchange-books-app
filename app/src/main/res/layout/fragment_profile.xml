@@ -1,20 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="15dp"
     tools:context=".ui.profile.ProfileFragment">
 
+    <ImageView
+        android:id="@+id/iv_photo_profile"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/photo"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp" />
+
+    <TextView
+        android:id="@+id/tv_name_profile"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="User Name"
+        android:textColor="@color/black"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:textAlignment="center"/>
+
     <Button
-        android:id="@+id/login_button"
-        android:layout_width="228dp"
-        android:layout_height="74dp"
-        android:layout_marginBottom="657dp"
-        android:text="S'authentifier"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:id="@+id/btn_prop_profile"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        android:text="Mes Propositions"
+        android:background="#17C3B3"/>
+
+    <Button
+        android:id="@+id/btn_commande_profile"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:text="Mes Commandes"
+        android:background="#17C3B3"/>
+
+    <Button
+        android:id="@+id/btn_deconnect"
+        android:layout_width="200dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="150dp"
+        android:text="Déconnecxion"
+        android:background="#17C3B3"/>
+</LinearLayout>
