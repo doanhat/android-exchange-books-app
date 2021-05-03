@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -21,6 +22,7 @@ import com.example.donpoly.views.PropositionAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -52,7 +54,9 @@ public class HomeFragment extends Fragment {
         rvProps.setAdapter(adapter);
         // Set layout manager to position the items
         rvProps.setLayoutManager(new LinearLayoutManager(getContext()));
-        mFirebaseDatabase = FirebaseDatabase.getInstance("https://nf28-donpoly-default-rtdb.europe-west1.firebasedatabase.app/");
+
+        // Get DB instance
+        mFirebaseDatabase = FirebaseDatabase.getInstance(getString(R.string.database_path));
         mFirebaseDatabase.setLogLevel(Logger.Level.DEBUG);
         mDbPropositions = mFirebaseDatabase.getReference().child("propositions");
         mDbPropositions.addValueEventListener(new ValueEventListener() {
@@ -74,9 +78,36 @@ public class HomeFragment extends Fragment {
                 Log.w(TAG, "loadPost:onCancelled", error.toException());
             }
         });
+        mDbPropositions.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                Proposition prop = snapshot.getValue(Proposition.class);
+                propositions.add(prop);
+                adapter.notifyDataSetChanged();
+            }
 
-        FloatingActionButton button = root.findViewById(R.id.reload_item_button);
-        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        FloatingActionButton reloadButton = root.findViewById(R.id.reload_item_button);
+        reloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(getContext(),"Opération affectée", Toast.LENGTH_LONG).show();
@@ -95,6 +126,14 @@ public class HomeFragment extends Fragment {
                         }
                     }
                 });
+            }
+        });
+
+        FloatingActionButton addButton = root.findViewById(R.id.add_item_button);
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
             }
         });
         return root;
