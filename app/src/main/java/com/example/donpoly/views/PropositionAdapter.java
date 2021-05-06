@@ -1,6 +1,8 @@
 package com.example.donpoly.views;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,16 +12,25 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.donpoly.MainActivity;
+import com.example.donpoly.PropositionActivity;
 import com.example.donpoly.R;
 import com.example.donpoly.data.model.Proposition;
+import com.example.donpoly.data.tools.JSONModel;
+import com.example.donpoly.ui.home.HomeFragment;
 
 import java.util.List;
 
+import static com.example.donpoly.ui.home.HomeFragment.PROP_MOD;
+
 public class PropositionAdapter extends RecyclerView.Adapter<PropositionAdapter.ViewHolder> {
+
+    private Context context;
+    public static final String MODIFICATION = "modification";
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Context context = parent.getContext();
+        context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
 
         // Inflate the custom layout
@@ -40,6 +51,19 @@ public class PropositionAdapter extends RecyclerView.Adapter<PropositionAdapter.
         vProp_title.setText(proposition.getTitle());
         TextView vProp_price = holder.prop_price;
         vProp_price.setText(String.valueOf(proposition.getPrice()));
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+
+
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context,
+                        PropositionActivity.class);
+                intent.putExtra(HomeFragment.PROP_DATA, JSONModel.serialize(proposition));
+                intent.putExtra(MODIFICATION,PROP_MOD);
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -67,4 +91,6 @@ public class PropositionAdapter extends RecyclerView.Adapter<PropositionAdapter.
     public PropositionAdapter(List<Proposition> props) {
         mProps = props;
     }
+
+
 }

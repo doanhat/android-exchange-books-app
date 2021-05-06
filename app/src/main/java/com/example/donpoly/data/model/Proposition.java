@@ -1,14 +1,26 @@
 package com.example.donpoly.data.model;
 
+import android.annotation.SuppressLint;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
+
+import com.example.donpoly.data.tools.JSONModel;
 import com.example.donpoly.data.tools.Status;
 import com.google.firebase.database.IgnoreExtraProperties;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.UUID;
 
 @IgnoreExtraProperties
-public class Proposition {
+public class Proposition extends JSONModel {
     private String id;
     private String title;
     private Status status;
@@ -34,12 +46,12 @@ public class Proposition {
     }
 
     public Proposition() {
-        this.title = "title";
+        this.title = "";
         this.status = Status.ACCEPTABLE;
-        this.description = "description";
-        this.postedDay = "12/12/2021";
-        this.validDay = "12/12/2021";
-        this.price = 5;
+        this.description = "";
+        this.postedDay = "";
+        this.validDay = getDateFromCalendar(Calendar.getInstance());
+        this.price = 0;
         this.exchangeable = true;
         this.author = null;
         this.taker = null;
@@ -135,5 +147,24 @@ public class Proposition {
         this.id = id;
     }
 
+    //@SuppressLint("DefaultLocale")
+    /*@RequiresApi(api = Build.VERSION_CODES.O)
+    public String getValidDayFromLocalDate(LocalDate date){
+        return String.format("%s/%s/%s",
+                String.format("%02d", date.getDayOfMonth()),
+                String.format("%02d", date.getMonthValue()),
+                String.format("%02d", date.getYear()));
+    }*/
 
+    @SuppressLint("DefaultLocale")
+    public String getDateFromCalendar(Calendar calendar){
+        int mYear, mMonth, mDay;
+        mYear = calendar.get(Calendar.YEAR);
+        mMonth = calendar.get(Calendar.MONTH);
+        mDay = calendar.get(Calendar.DAY_OF_MONTH);
+        return String.format("%s/%s/%s",
+                String.format("%02d", mDay),
+                String.format("%02d", mMonth + 1),
+                String.format("%02d", mYear));
+    }
 }
