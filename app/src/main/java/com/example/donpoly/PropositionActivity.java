@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.InputType;
 import android.view.KeyEvent;
 import android.view.View;
@@ -24,6 +25,8 @@ import com.example.donpoly.views.PropositionAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.Calendar;
+
+import static com.example.donpoly.ui.home.HomeFragment.PROP_DATA;
 
 public class PropositionActivity extends AppCompatActivity {
     public static final int CRE_OK = 1;
@@ -48,11 +51,23 @@ public class PropositionActivity extends AppCompatActivity {
         FloatingActionButton validate_button = findViewById(R.id.validate_button);
 
         if (intent.getIntExtra(PropositionAdapter.MODIFICATION, 0)==HomeFragment.PROP_MOD){
-            proposition = JSONModel.deserialize(intent.getStringExtra(HomeFragment.PROP_DATA),Proposition.class);
+            proposition = JSONModel.deserialize(intent.getStringExtra(PROP_DATA),Proposition.class);
             this.setTitle("Modifier la proposition");
         }else{
             proposition = new Proposition();
             this.setTitle("Créer une proposition");
+            validate_button.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    Intent intent = new Intent();
+                    proposition.setTitle(title_zone.getText().toString());
+                    proposition.setValidDay(date_zone.getText().toString());
+                    proposition.setPostedDay(proposition.getDateTimeFromCalendar(Calendar.getInstance()));
+                    // TODO : set Author
+                    intent.putExtra(PROP_DATA, JSONModel.serialize(proposition));
+                    setResult(CRE_OK,intent);
+                    finish();
+                }
+            });
         }
 
         title_zone.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -112,6 +127,7 @@ public class PropositionActivity extends AppCompatActivity {
                                         String.format("%02d", dayOfMonth),
                                         String.format("%02d", monthOfYear + 1),
                                         String.format("%02d", year)));
+                                proposition.setValidDay(date_zone.getText().toString());
                             }
                         }, mYear, mMonth, mDay);
                 datePickerDialog.show();
@@ -126,5 +142,7 @@ public class PropositionActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+
     }
 }

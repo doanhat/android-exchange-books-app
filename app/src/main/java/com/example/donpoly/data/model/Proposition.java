@@ -10,6 +10,7 @@ import com.example.donpoly.data.tools.Status;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,10 +18,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.UUID;
 
 @IgnoreExtraProperties
-public class Proposition extends JSONModel {
+public class Proposition extends JSONModel implements Comparable<Proposition>{
     private String id;
     private String title;
     private Status status;
@@ -49,7 +51,7 @@ public class Proposition extends JSONModel {
         this.title = "";
         this.status = Status.ACCEPTABLE;
         this.description = "";
-        this.postedDay = "";
+        this.postedDay = getDateTimeFromCalendar(Calendar.getInstance());
         this.validDay = getDateFromCalendar(Calendar.getInstance());
         this.price = 0;
         this.exchangeable = true;
@@ -166,5 +168,39 @@ public class Proposition extends JSONModel {
                 String.format("%02d", mDay),
                 String.format("%02d", mMonth + 1),
                 String.format("%02d", mYear));
+    }
+
+    @SuppressLint("DefaultLocale")
+    public String getDateTimeFromCalendar(Calendar calendar) {
+
+        int mYear, mMonth, mDay, mHour, mMinute, mSecond;
+        mYear = calendar.get(Calendar.YEAR);
+        mMonth = calendar.get(Calendar.MONTH);
+        mDay = calendar.get(Calendar.DAY_OF_MONTH);
+        mHour = calendar.get(Calendar.HOUR_OF_DAY);
+        mMinute = calendar.get(Calendar.MINUTE);
+        mSecond = calendar.get(Calendar.SECOND);
+        return String.format("%s/%s/%s-%s:%s:%s",
+                String.format("%02d", mDay),
+                String.format("%02d", mMonth + 1),
+                String.format("%02d", mYear),
+                String.format("%02d", mHour),
+                String.format("%02d", mMinute),
+                String.format("%02d", mSecond));
+    }
+
+    @Override
+    public int compareTo(Proposition p) {
+        Calendar cal1 = Calendar.getInstance();
+        Calendar cal2 = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy-HH:mm:ss", Locale.FRENCH);
+        try {
+            cal1.setTime(sdf.parse(this.postedDay));
+            cal2.setTime(sdf.parse(p.getPostedDay()));
+            return cal2.compareTo(cal1);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }

@@ -28,7 +28,12 @@ import com.example.donpoly.data.model.Proposition;
 import com.example.donpoly.data.tools.FirebaseController;
 import com.example.donpoly.data.tools.JSONModel;
 import com.example.donpoly.views.PropositionAdapter;
+import com.example.donpoly.views.PropositionItemAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.firebase.ui.database.SnapshotParser;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.ChildEventListener;
@@ -37,9 +42,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.lang.annotation.Documented;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Objects;
 
 public class HomeFragment extends Fragment {
 
@@ -61,31 +71,34 @@ public class HomeFragment extends Fragment {
                 new ViewModelProvider(this).get(HomeViewModel.class);
         View root = inflater.inflate(R.layout.fragment_home, container, false);
 
+        firebaseController = new FirebaseController("propositions");
+        mDbPropositions = firebaseController.getReferences().get("propositions");
+        assert mDbPropositions != null;
+        // Get DB instance
         RecyclerView rvProps = (RecyclerView) root.findViewById(R.id.proposition_rv);
         // Create adapter passing in the sample user data
         adapter = new PropositionAdapter(propositions);
-        adapter.notifyDataSetChanged();
+        //adapter.notifyDataSetChanged();
         // Attach the adapter to the recyclerview to populate items
         rvProps.setAdapter(adapter);
         // Set layout manager to position the items
         rvProps.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Get DB instance
-        firebaseController = new FirebaseController("propositions");
-        //firebaseController.setLogLevel(Logger.Level.DEBUG);
-        mDbPropositions = firebaseController.getReferences().get("propositions");
-        assert mDbPropositions != null;
+
         mDbPropositions.addValueEventListener(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                propositions.clear();
+
                 for (DataSnapshot postSnapshot: snapshot.getChildren()) {
                     Proposition prop = postSnapshot.getValue(Proposition.class);
                     assert prop != null;
                     propositions.add(0,prop);
-                    adapter.notifyDataSetChanged();
                     Log.e("Get Data", prop.getId());
                 }
+                Collections.sort(propositions);
+                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -97,24 +110,27 @@ public class HomeFragment extends Fragment {
         mDbPropositions.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                Proposition prop = snapshot.getValue(Proposition.class);
-                propositions.add(prop);
+                /*Proposition prop = snapshot.getValue(Proposition.class);
+                propositions.add(0,prop);*/
+                Collections.sort(propositions);
                 adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
+                Collections.sort(propositions);
+                adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
+                adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
+                Collections.sort(propositions);
+                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -130,9 +146,6 @@ public class HomeFragment extends Fragment {
             public void onClick(View v) {
                 Toast.makeText(getContext(),"Opération affectée", Toast.LENGTH_LONG).show();
                 mDbPropositions = firebaseController.getReferences().get("propositions");
-                /*for (Proposition p : propositions) {
-                    mDbPropositions.child(p.getId()).setValue(p);
-                }*/
                 assert mDbPropositions != null;
                 mDbPropositions.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
                     @Override
@@ -142,6 +155,7 @@ public class HomeFragment extends Fragment {
                         }
                         else {
                             Log.d("firebase", String.valueOf(task.getResult().getValue()));
+                            Log.d("propsition",propositions.toString());
                         }
                     }
                 });
@@ -169,8 +183,25 @@ public class HomeFragment extends Fragment {
             if (resultCode == PropositionActivity.CRE_OK){
                 Proposition proposition = JSONModel.deserialize(data.getStringExtra(PROP_DATA),Proposition.class);
                 if (proposition != null){
-                    propositions.add(proposition);
-                    adapter.notifyDataSetChanged();
+                    /*propositions.add(proposition);
+                    adapter.notifyDataSetChanged();*/
+                    Log.d("postedDay",proposition.getPostedDay());
+                    mDbPropositions.child(proposition.getId()).setValue(proposition).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            // after the data addition is successful
+                            // we are displaying a success toast message.
+                            Toast.makeText(getContext(), "Proposition ajoutée avec succès " + proposition.getId(), Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            // this method is called when the data addition process is failed.
+                            // displaying a toast message when data addition is failed.
+                            Toast.makeText(getContext(), "Echec lors de l'ajoute de la proposition \n" + e, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
                 }
             }
             if (resultCode == PropositionActivity.CANCEL){
