@@ -1,5 +1,7 @@
 package com.example.donpoly.ui.home;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -89,7 +91,40 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onLongItemClick(View view, int position) {
-                // do whatever
+                Proposition proposition = (Proposition) adapter.getItem(position);
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setCancelable(true);
+                builder.setTitle("Supprimer la proposition");
+                builder.setMessage("Voulez-vous le supprimer ?");
+                builder.setPositiveButton("Oui",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                mDbPropositions.child(proposition.getId()).removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        // after the data addition is successful
+                                        // we are displaying a success toast message.
+                                        Toast.makeText(getContext(), "Proposition supprimée avec succès " + proposition.getId(), Toast.LENGTH_SHORT).show();
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        // this method is called when the data addition process is failed.
+                                        // displaying a toast message when data addition is failed.
+                                        Toast.makeText(getContext(), "Echec lors de la suppresion de la proposition \n" + e, Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        });
+                builder.setNegativeButton("Non", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
             }
         }));
         mDbPropositions.addValueEventListener(new ValueEventListener() {
