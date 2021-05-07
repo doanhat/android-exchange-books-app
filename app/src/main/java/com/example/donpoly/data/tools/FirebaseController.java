@@ -21,7 +21,8 @@ public class FirebaseController {
 
     public FirebaseController(String childName) {
         mFirebaseDatabase = FirebaseDatabase.getInstance(path);
-        setLogLevel(Logger.Level.DEBUG);
+        // TODO décommenter si vouloir debuger firebase
+        //setLogLevel(Logger.Level.DEBUG);
         references.put(childName,mFirebaseDatabase.getReference().child(childName));
     }
 
