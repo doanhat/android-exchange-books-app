@@ -1,4 +1,4 @@
-package com.example.donpoly.views;
+package com.example.donpoly.views.adapters;
 
 import android.content.Context;
 import android.content.Intent;

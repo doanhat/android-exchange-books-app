@@ -3,9 +3,10 @@ package com.example.donpoly;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.text.InputType;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
@@ -15,13 +16,14 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.donpoly.data.model.Proposition;
 import com.example.donpoly.data.tools.JSONModel;
 import com.example.donpoly.data.tools.Status;
 import com.example.donpoly.ui.home.HomeFragment;
-import com.example.donpoly.views.PropositionAdapter;
+import com.example.donpoly.views.adapters.PropositionAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.Calendar;
@@ -34,6 +36,7 @@ public class PropositionActivity extends AppCompatActivity {
     public static final int MOD_OK = 2;
     private Proposition proposition;
     private int mYear, mMonth, mDay;
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,22 +56,49 @@ public class PropositionActivity extends AppCompatActivity {
         if (intent.getIntExtra(PropositionAdapter.MODIFICATION, 0)==HomeFragment.PROP_MOD){
             proposition = JSONModel.deserialize(intent.getStringExtra(PROP_DATA),Proposition.class);
             this.setTitle("Modifier la proposition");
+            validate_button.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    Intent intentProp = new Intent();
+                    proposition.setTitle(title_zone.getText().toString());
+                    proposition.setDescription(des_zone.getText().toString());
+                    proposition.setPrice(Float.parseFloat(price_zone.getText().toString()));
+                    proposition.setPostedDay(proposition.getDateTimeFromCalendar(Calendar.getInstance()));
+                    // TODO : set Author
+                    intentProp.putExtra(PROP_DATA, JSONModel.serialize(proposition));
+                    setResult(MOD_OK,intentProp);
+                    finish();
+                }
+            });
         }else{
             proposition = new Proposition();
             this.setTitle("Créer une proposition");
             validate_button.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    Intent intent = new Intent();
+                    Intent intentProp = new Intent();
                     proposition.setTitle(title_zone.getText().toString());
+                    proposition.setDescription(des_zone.getText().toString());
+                    proposition.setPrice(Float.parseFloat(price_zone.getText().toString()));
                     proposition.setValidDay(date_zone.getText().toString());
                     proposition.setPostedDay(proposition.getDateTimeFromCalendar(Calendar.getInstance()));
                     // TODO : set Author
-                    intent.putExtra(PROP_DATA, JSONModel.serialize(proposition));
-                    setResult(CRE_OK,intent);
+                    Log.d("champ",proposition.getDescription()+" // "+des_zone.getText().toString());
+                    intentProp.putExtra(PROP_DATA, JSONModel.serialize(proposition));
+                    setResult(CRE_OK,intentProp);
                     finish();
                 }
             });
         }
+
+        title_zone.setText(proposition.getTitle());
+        status_zone.setProgress(0,proposition.getStatus()==Status.ACCEPTABLE);
+        status_zone.setProgress(1,proposition.getStatus()==Status.GOOD);
+        status_zone.setProgress(2,proposition.getStatus()==Status.VERY_GOOD);
+        status_zone.setProgress(3,proposition.getStatus()==Status.NEW);
+        des_zone.setText(proposition.getDescription());
+        date_zone.setText(proposition.getValidDay());
+        price_zone.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        price_zone.setText(String.valueOf(proposition.getPrice()));
+
 
         title_zone.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -77,10 +107,7 @@ public class PropositionActivity extends AppCompatActivity {
                 return false;
             }
         });
-        des_zone.setText(proposition.getDescription());
-//        status_zone.setMax(3);
-//        status_zone.incrementProgressBy(1);
-        date_zone.setText(proposition.getValidDay());
+
         status_zone.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -103,6 +130,14 @@ public class PropositionActivity extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
 
+            }
+        });
+
+        des_zone.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                proposition.setDescription(des_zone.getText().toString());
+                return false;
             }
         });
 
@@ -133,8 +168,16 @@ public class PropositionActivity extends AppCompatActivity {
                 datePickerDialog.show();
             }
         });
-        price_zone.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        price_zone.setText(String.valueOf(proposition.getPrice()));
+
+        price_zone.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                proposition.setPrice(Float.parseFloat(price_zone.getText().toString()));
+                return false;
+            }
+        });
+
+
         cancel_button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent intent = new Intent();
@@ -142,7 +185,5 @@ public class PropositionActivity extends AppCompatActivity {
                 finish();
             }
         });
-
-
     }
 }

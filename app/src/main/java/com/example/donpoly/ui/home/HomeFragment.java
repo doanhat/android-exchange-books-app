@@ -6,11 +6,8 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,16 +18,13 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.donpoly.MainActivity;
 import com.example.donpoly.PropositionActivity;
 import com.example.donpoly.R;
 import com.example.donpoly.data.model.Proposition;
 import com.example.donpoly.data.tools.FirebaseController;
 import com.example.donpoly.data.tools.JSONModel;
-import com.example.donpoly.views.PropositionAdapter;
-import com.example.donpoly.views.PropositionItemAdapter;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.firebase.ui.database.SnapshotParser;
+import com.example.donpoly.views.adapters.PropositionAdapter;
+import com.example.donpoly.views.listeners.RecyclerItemClickListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -41,15 +35,12 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Logger;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import java.lang.annotation.Documented;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Objects;
+
+import static com.example.donpoly.views.adapters.PropositionAdapter.MODIFICATION;
 
 public class HomeFragment extends Fragment {
 
@@ -84,7 +75,23 @@ public class HomeFragment extends Fragment {
         // Set layout manager to position the items
         rvProps.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        rvProps.addOnItemTouchListener(new RecyclerItemClickListener(getContext(), rvProps ,new RecyclerItemClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                Proposition proposition = (Proposition) adapter.getItem(position);
+                Log.d("modify",proposition.getTitle());
+                Intent intent = new Intent(getContext(),
+                        PropositionActivity.class);
+                intent.putExtra(HomeFragment.PROP_DATA, JSONModel.serialize(proposition));
+                intent.putExtra(MODIFICATION,PROP_MOD);
+                startActivityForResult(intent, PROP_MOD);
+            }
 
+            @Override
+            public void onLongItemClick(View view, int position) {
+                // do whatever
+            }
+        }));
         mDbPropositions.addValueEventListener(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
@@ -183,8 +190,6 @@ public class HomeFragment extends Fragment {
             if (resultCode == PropositionActivity.CRE_OK){
                 Proposition proposition = JSONModel.deserialize(data.getStringExtra(PROP_DATA),Proposition.class);
                 if (proposition != null){
-                    /*propositions.add(proposition);
-                    adapter.notifyDataSetChanged();*/
                     Log.d("postedDay",proposition.getPostedDay());
                     mDbPropositions.child(proposition.getId()).setValue(proposition).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
@@ -212,9 +217,21 @@ public class HomeFragment extends Fragment {
             if (resultCode == PropositionActivity.MOD_OK){
                 Proposition proposition = JSONModel.deserialize(data.getStringExtra(PROP_DATA),Proposition.class);
                 if (proposition != null){
-                    String idProp = data.getStringExtra(PROP_ID);
-                    mDbPropositions.child(idProp).setValue(proposition);
-                    adapter.notifyDataSetChanged();
+                    mDbPropositions.child(proposition.getId()).setValue(proposition).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            // after the data addition is successful
+                            // we are displaying a success toast message.
+                            Toast.makeText(getContext(), "Proposition modifiée avec succès " + proposition.getId(), Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            // this method is called when the data addition process is failed.
+                            // displaying a toast message when data addition is failed.
+                            Toast.makeText(getContext(), "Echec lors de la modofication de la proposition \n" + e, Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 }
             }
             if (resultCode == PropositionActivity.CANCEL){
