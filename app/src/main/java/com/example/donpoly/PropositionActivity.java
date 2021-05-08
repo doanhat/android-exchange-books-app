@@ -1,10 +1,13 @@
 package com.example.donpoly;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -12,13 +15,18 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.donpoly.data.model.Proposition;
 import com.example.donpoly.data.tools.JSONModel;
 import com.example.donpoly.data.tools.Status;
@@ -26,7 +34,11 @@ import com.example.donpoly.ui.home.HomeFragment;
 import com.example.donpoly.views.adapters.PropositionAdapter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Calendar;
+
+import pub.devrel.easypermissions.EasyPermissions;
 
 import static com.example.donpoly.ui.home.HomeFragment.PROP_DATA;
 
@@ -36,6 +48,15 @@ public class PropositionActivity extends AppCompatActivity {
     public static final int MOD_OK = 2;
     private Proposition proposition;
     private int mYear, mMonth, mDay;
+
+    // 1 - Uri of image selected by user
+    private Uri uriImageSelected;
+
+    // 1 - STATIC DATA FOR PICTURE
+    private static final String PERMS = Manifest.permission.READ_EXTERNAL_STORAGE;
+    private static final int RC_IMAGE_PERMS = 100;
+    private static final int RC_CHOOSE_PHOTO = 200;
+    private LinearLayout linearImageLayout;
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,6 +73,8 @@ public class PropositionActivity extends AppCompatActivity {
         EditText price_zone = findViewById(R.id.price_zone);
         FloatingActionButton cancel_button = findViewById(R.id.cancel_button);
         FloatingActionButton validate_button = findViewById(R.id.validate_button);
+        Button add_photo_button = findViewById(R.id.add_photo_button);
+        linearImageLayout = findViewById(R.id.image_zone);
 
         if (intent.getIntExtra(PropositionAdapter.MODIFICATION, 0)==HomeFragment.PROP_MOD){
             proposition = JSONModel.deserialize(intent.getStringExtra(PROP_DATA),Proposition.class);
@@ -107,7 +130,6 @@ public class PropositionActivity extends AppCompatActivity {
                 return false;
             }
         });
-
         status_zone.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -132,7 +154,6 @@ public class PropositionActivity extends AppCompatActivity {
 
             }
         });
-
         des_zone.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -140,7 +161,6 @@ public class PropositionActivity extends AppCompatActivity {
                 return false;
             }
         });
-
         date_picker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -168,7 +188,6 @@ public class PropositionActivity extends AppCompatActivity {
                 datePickerDialog.show();
             }
         });
-
         price_zone.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -176,8 +195,6 @@ public class PropositionActivity extends AppCompatActivity {
                 return false;
             }
         });
-
-
         cancel_button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent intent = new Intent();
@@ -185,5 +202,55 @@ public class PropositionActivity extends AppCompatActivity {
                 finish();
             }
         });
+        add_photo_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                this.chooseImageFromPhone();
+            }
+
+            private void chooseImageFromPhone() {
+                if (!EasyPermissions.hasPermissions(getBaseContext(), PERMS)) {
+                    EasyPermissions.requestPermissions(PropositionActivity.this, getString(R.string.popup_title_permission_files_access), RC_IMAGE_PERMS, PERMS);
+                    return;
+                }
+                // 3 - Launch an "Selection Image" Activity
+                Intent i = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(i, RC_CHOOSE_PHOTO);
+            }
+        });
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // 2 - Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // 6 - Calling the appropriate method after activity result
+        this.handleResponse(requestCode, resultCode, data);
+    }
+
+    private void handleResponse(int requestCode, int resultCode, Intent data) {
+        if (requestCode == RC_CHOOSE_PHOTO) {
+            if (resultCode == RESULT_OK) { //SUCCESS
+                this.uriImageSelected = data.getData();
+                ImageView imageViewPreview = new ImageView(this);
+                Glide.with(this) //SHOWING PREVIEW OF IMAGE
+                        .load(this.uriImageSelected)
+                        .apply(RequestOptions.noTransformation())
+                        .into(imageViewPreview);
+                imageViewPreview.setMaxWidth(5);
+                imageViewPreview.setMaxHeight(5);
+                int count = linearImageLayout.getChildCount();
+                Log.d("image",String.valueOf(count));
+                linearImageLayout.addView(imageViewPreview);
+            } else {
+                Toast.makeText(this, getString(R.string.toast_title_no_image_chosen), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 }

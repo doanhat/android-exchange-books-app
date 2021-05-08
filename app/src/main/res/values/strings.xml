@@ -26,4 +26,6 @@
     <string name="reset_button">Réinitialiser</string>
     <string name="validate_button">Valider</string>
     <string name="cancel_button">Annuler</string>
+    <string name="popup_title_permission_files_access">Permission</string>
+    <string name="toast_title_no_image_chosen">Aucune image choisie</string>
 </resources>
