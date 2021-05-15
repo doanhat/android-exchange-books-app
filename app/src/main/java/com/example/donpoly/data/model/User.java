@@ -1,34 +1,34 @@
 package com.example.donpoly.data.model;
 
+
+
+import com.google.firebase.database.annotations.Nullable;
+
 import java.util.UUID;
 
 public class User {
 
     private String id;
     private String displayName;
+    @Nullable
+    private String urlPicture;
 
-    public User(String id, String displayName) {
-        this.id = UUID.randomUUID().toString();
-        this.displayName = displayName;
+    public User() { }
+
+    public User(String uid, String username, String urlPicture) {
+        this.id = uid;
+        this.displayName = username;
+        this.urlPicture = urlPicture;
     }
 
-    public User() {
-        this.id = UUID.randomUUID().toString();
-    }
+    // --- GETTERS ---
+    public String getId() { return id; }
+    public String getUsername() { return displayName; }
+    public String getUrlPicture() { return urlPicture; }
 
-    public String getId() {
-        return id;
-    }
+    // --- SETTERS ---
+    public void setUsername(String username) { this.displayName = username; }
+    public void setUid(String uid) { this.id = uid; }
+    public void setUrlPicture(String urlPicture) { this.urlPicture = urlPicture; }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
 }
