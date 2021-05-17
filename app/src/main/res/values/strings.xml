@@ -14,4 +14,18 @@
     <string name="login_failed">"Login failed"</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="database_path">https://nf28-donpoly-default-rtdb.europe-west1.firebasedatabase.app/</string>
+    <string name="title">Titre</string>
+    <string name="status">État</string>
+    <string name="status_0">ACCEPTABLE</string>
+    <string name="status_1">BON</string>
+    <string name="status_2">TRÈS BON</string>
+    <string name="status_3">NEUF</string>
+    <string name="description">Description</string>
+    <string name="description_zone">Description ici</string>
+    <string name="reset_button">Réinitialiser</string>
+    <string name="validate_button">Valider</string>
+    <string name="cancel_button">Annuler</string>
+    <string name="popup_title_permission_files_access">Permission</string>
+    <string name="toast_title_no_image_chosen">Aucune image choisie</string>
 </resources>
