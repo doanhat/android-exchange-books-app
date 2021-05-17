@@ -1,10 +1,14 @@
 package com.example.donpoly;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import com.example.donpoly.adapter.MyFragmentPagerAdapter;
+import adapter.MyFragmentPagerAdapter;
 import com.example.donpoly.ui.home.HomeFragment;
+import com.example.donpoly.ui.login.LoginActivity;
 import com.example.donpoly.ui.messages.MessagesFragment;
 import com.example.donpoly.ui.profile.ProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -22,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager mViewPager;
     private BottomNavigationView mNavView;
     private MenuItem mMenuItem;
+    private SharedPreferences sharedPreferences;
+    private Boolean isLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +48,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initData() {
+        sharedPreferences = getSharedPreferences("login", Context.MODE_PRIVATE);
+        isLogin = sharedPreferences.getBoolean("login",false);
+    }
+
+    private void initView() {
+        mViewPager = findViewById(R.id.viewPager);
+        mNavView = findViewById(R.id.nav_view);
+
         List<Fragment> fragments = new ArrayList<>();
         fragments.add(new HomeFragment());
         fragments.add(new MessagesFragment());
@@ -63,8 +77,14 @@ public class MainActivity extends AppCompatActivity {
                 }else {
                     mNavView.getMenu().getItem(0).setChecked(false);
                 }
-                mMenuItem = mNavView.getMenu().getItem(position);
-                mMenuItem.setChecked(true);
+
+                if (position == 2 && !isLogin){
+                    Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                    startActivity(intent);
+                }else {
+                    mMenuItem = mNavView.getMenu().getItem(position);
+                    mMenuItem.setChecked(true);
+                }
             }
 
             @Override
@@ -85,17 +105,19 @@ public class MainActivity extends AppCompatActivity {
                         mViewPager.setCurrentItem(1);
                         return true;
                     case R.id.navigation_profil:
-                        mViewPager.setCurrentItem(2);
-                        return true;
+                        if (isLogin){
+                            mViewPager.setCurrentItem(2);
+                            return true;
+                        }else {
+                            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                            startActivity(intent);
+                            return false;
+                        }
+
                 }
                 return false;
             }
         });
-    }
-
-    private void initView() {
-        mViewPager = findViewById(R.id.viewPager);
-        mNavView = findViewById(R.id.nav_view);
     }
 
 

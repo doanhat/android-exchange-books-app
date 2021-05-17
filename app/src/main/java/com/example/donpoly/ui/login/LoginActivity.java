@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,6 +42,8 @@ public class LoginActivity extends AppCompatActivity {
 
         final EditText usernameEditText = findViewById(R.id.username);
         final EditText passwordEditText = findViewById(R.id.password);
+        final ImageView userDelete = findViewById(R.id.iv_icon_userDelete);
+        final ImageView pwdDelete = findViewById(R.id.iv_icon_pwdDelete);
         final Button loginButton = findViewById(R.id.login);
         final ProgressBar loadingProgressBar = findViewById(R.id.loading);
 
@@ -86,7 +89,8 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        TextWatcher afterTextChangedListener = new TextWatcher() {
+
+        usernameEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 // ignore
@@ -99,12 +103,41 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
+                if (s.toString().length() > 0){
+                    userDelete.setVisibility(View.VISIBLE);
+                }else {
+                    userDelete.setVisibility(View.INVISIBLE);
+                }
+
                 loginViewModel.loginDataChanged(usernameEditText.getText().toString(),
                         passwordEditText.getText().toString());
             }
-        };
-        usernameEditText.addTextChangedListener(afterTextChangedListener);
-        passwordEditText.addTextChangedListener(afterTextChangedListener);
+        });
+
+        passwordEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // ignore
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // ignore
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.toString().length() > 0){
+                    pwdDelete.setVisibility(View.VISIBLE);
+                }else {
+                    pwdDelete.setVisibility(View.INVISIBLE);
+                }
+
+                loginViewModel.loginDataChanged(usernameEditText.getText().toString(),
+                        passwordEditText.getText().toString());
+            }
+        });
+
         passwordEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
             @Override
@@ -123,6 +156,20 @@ public class LoginActivity extends AppCompatActivity {
                 loadingProgressBar.setVisibility(View.VISIBLE);
                 loginViewModel.login(usernameEditText.getText().toString(),
                         passwordEditText.getText().toString());
+            }
+        });
+
+        userDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                usernameEditText.setText("");
+            }
+        });
+
+        pwdDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                passwordEditText.setText("");
             }
         });
     }

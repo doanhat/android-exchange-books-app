@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.donpoly.R;
 import com.example.donpoly.data.model.Proposition;
-import com.example.donpoly.adapter.PropositionAdapter;
+import adapter.PropositionAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;

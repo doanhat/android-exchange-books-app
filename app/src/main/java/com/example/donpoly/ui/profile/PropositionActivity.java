@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import adapter.MyRecyclerViewAdapter;
+
 public class PropositionActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private MyRecyclerViewAdapter myRecyclerViewAdapter;

@@ -1,4 +1,4 @@
-package com.example.donpoly.adapter;
+package adapter;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
