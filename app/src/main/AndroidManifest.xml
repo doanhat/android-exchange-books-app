@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.donpoly">
+
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
     <application
         android:name="androidx.multidex.MultiDexApplication"
         android:allowBackup="true"
@@ -11,6 +12,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DonPoly">
+        <activity android:name=".ui.profile.PolyActivity"></activity>
+        <activity android:name=".ui.profile.PropositionActivity" />
         <activity
             android:name=".ui.login.LoginActivity"
             android:label="@string/title_activity_login" />
@@ -23,9 +26,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".PropositionActivity"
-            android:label="PropositionActivity" />
     </application>
 
 </manifest>
