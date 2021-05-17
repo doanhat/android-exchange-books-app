@@ -1,4 +1,4 @@
-package com.example.donpoly.views;
+package com.example.donpoly.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;

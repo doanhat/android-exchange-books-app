@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.donpoly.R;
 import com.example.donpoly.data.model.Proposition;
-import com.example.donpoly.views.PropositionAdapter;
+import com.example.donpoly.adapter.PropositionAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -38,10 +38,12 @@ public class HomeFragment extends Fragment {
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mDbPropositions;
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
-        homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
+    public HomeFragment(){
+        // Required empty public constructor
+    }
+
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         View root = inflater.inflate(R.layout.fragment_home, container, false);
 
         RecyclerView rvProps = (RecyclerView) root.findViewById(R.id.proposition_rv);
