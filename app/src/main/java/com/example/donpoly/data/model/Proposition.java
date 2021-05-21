@@ -1,6 +1,7 @@
 package com.example.donpoly.data.model;
 
 import android.annotation.SuppressLint;
+import android.net.Uri;
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
@@ -31,10 +32,11 @@ public class Proposition extends JSONModel implements Comparable<Proposition>{
     private String validDay;
     private float price;
     private boolean exchangeable;
-    private LoggedInUser author;
-    private LoggedInUser taker;
+    private String author;
+    private String taker;
+    private String imageUrl;
 
-    public Proposition(String title, Status status, String description, String postedDay, String validDay, float price, boolean exchangeable, LoggedInUser author, LoggedInUser taker) {
+    public Proposition(String title, Status status, String description, String postedDay, String validDay, float price, boolean exchangeable, String author, String taker,String image) {
         this.title = title;
         this.status = status;
         this.description = description;
@@ -45,6 +47,7 @@ public class Proposition extends JSONModel implements Comparable<Proposition>{
         this.author = author;
         this.taker = taker;
         this.id = UUID.randomUUID().toString();
+        this.imageUrl=image;
     }
 
     public Proposition() {
@@ -58,6 +61,7 @@ public class Proposition extends JSONModel implements Comparable<Proposition>{
         this.author = null;
         this.taker = null;
         this.id = UUID.randomUUID().toString();
+        this.imageUrl=null;
     }
 
     public static ArrayList<Proposition> createDummies(int i) {
@@ -125,19 +129,19 @@ public class Proposition extends JSONModel implements Comparable<Proposition>{
         this.exchangeable = exchangeable;
     }
 
-    public LoggedInUser getAuthor() {
+    public String getAuthor() {
         return author;
     }
 
-    public void setAuthor(LoggedInUser author) {
+    public void setAuthor(String author) {
         this.author = author;
     }
 
-    public LoggedInUser getTaker() {
+    public String getTaker() {
         return taker;
     }
 
-    public void setTaker(LoggedInUser taker) {
+    public void setTaker(String taker) {
         this.taker = taker;
     }
 
@@ -148,6 +152,8 @@ public class Proposition extends JSONModel implements Comparable<Proposition>{
     public void setId(String id) {
         this.id = id;
     }
+
+
 
     //@SuppressLint("DefaultLocale")
     /*@RequiresApi(api = Build.VERSION_CODES.O)
@@ -202,5 +208,13 @@ public class Proposition extends JSONModel implements Comparable<Proposition>{
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

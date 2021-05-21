@@ -3,32 +3,34 @@ package com.example.donpoly.data.model;
 import java.util.UUID;
 
 public class User {
-
-    private String id;
-    private String displayName;
-
-    public User(String id, String displayName) {
-        this.id = UUID.randomUUID().toString();
-        this.displayName = displayName;
-    }
+    private String uid;
+    private String name;
+    private String imageurl;
 
     public User() {
-        this.id = UUID.randomUUID().toString();
     }
 
-    public String getId() {
-        return id;
+    public String getImageurl() {
+        return imageurl;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setImageurl(String imageurl) {
+        this.imageurl = imageurl;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String getUid() {
+        return uid;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

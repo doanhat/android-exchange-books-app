@@ -3,6 +3,7 @@ package com.example.donpoly;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -12,6 +13,7 @@ import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -21,6 +23,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,14 +35,22 @@ import com.example.donpoly.data.tools.JSONModel;
 import com.example.donpoly.data.tools.Status;
 import com.example.donpoly.ui.home.HomeFragment;
 import com.example.donpoly.views.adapters.PropositionAdapter;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Calendar;
 
 import pub.devrel.easypermissions.EasyPermissions;
-
 import static com.example.donpoly.ui.home.HomeFragment.PROP_DATA;
 
 public class PropositionActivity extends AppCompatActivity {
@@ -48,6 +59,7 @@ public class PropositionActivity extends AppCompatActivity {
     public static final int MOD_OK = 2;
     private Proposition proposition;
     private int mYear, mMonth, mDay;
+    StorageReference storageReference;
 
     // 1 - Uri of image selected by user
     private Uri uriImageSelected;
@@ -60,11 +72,15 @@ public class PropositionActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            //TODO:no user signed
+        }
+        String userid = user.getUid();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_proposition);
         Intent intent = getIntent();
         //Binding
-
         EditText title_zone = findViewById(R.id.title_zone);
         SeekBar status_zone = findViewById(R.id.status_bar);
         EditText des_zone = findViewById(R.id.description_zone);
@@ -75,10 +91,20 @@ public class PropositionActivity extends AppCompatActivity {
         FloatingActionButton validate_button = findViewById(R.id.validate_button);
         Button add_photo_button = findViewById(R.id.add_photo_button);
         linearImageLayout = findViewById(R.id.image_zone);
-
-        if (intent.getIntExtra(PropositionAdapter.MODIFICATION, 0)==HomeFragment.PROP_MOD){
-            proposition = JSONModel.deserialize(intent.getStringExtra(PROP_DATA),Proposition.class);
+        storageReference = FirebaseStorage.getInstance().getReference("Images");
+        if (intent.getIntExtra(PropositionAdapter.MODIFICATION, 0) == HomeFragment.PROP_MOD) {
+            proposition = JSONModel.deserialize(intent.getStringExtra(PROP_DATA), Proposition.class);
             this.setTitle("Modifier la proposition");
+            //TODO error
+                    title_zone.setText(proposition.getTitle());
+                    //status_zone.setProgress(0,proposition.getStatus()==Status.ACCEPTABLE);
+                    //status_zone.setProgress(1,proposition.getStatus()==Status.GOOD);
+                    //status_zone.setProgress(2,proposition.getStatus()==Status.VERY_GOOD);
+                    //status_zone.setProgress(3,proposition.getStatus()==Status.NEW);
+                    des_zone.setText(proposition.getDescription());
+                    date_zone.setText(proposition.getValidDay());
+                    price_zone.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                    price_zone.setText(String.valueOf(proposition.getPrice()));
             validate_button.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Intent intentProp = new Intent();
@@ -88,11 +114,11 @@ public class PropositionActivity extends AppCompatActivity {
                     proposition.setPostedDay(proposition.getDateTimeFromCalendar(Calendar.getInstance()));
                     // TODO : set Author
                     intentProp.putExtra(PROP_DATA, JSONModel.serialize(proposition));
-                    setResult(MOD_OK,intentProp);
+                    setResult(MOD_OK, intentProp);
                     finish();
                 }
             });
-        }else{
+        } else {
             proposition = new Proposition();
             this.setTitle("Créer une proposition");
             validate_button.setOnClickListener(new View.OnClickListener() {
@@ -103,26 +129,36 @@ public class PropositionActivity extends AppCompatActivity {
                     proposition.setPrice(Float.parseFloat(price_zone.getText().toString()));
                     proposition.setValidDay(date_zone.getText().toString());
                     proposition.setPostedDay(proposition.getDateTimeFromCalendar(Calendar.getInstance()));
-                    // TODO : set Author
-                    Log.d("champ",proposition.getDescription()+" // "+des_zone.getText().toString());
+                    proposition.setAuthor(userid);
+                    if (uriImageSelected != null) {
+                        final StorageReference storageReference= FirebaseStorage.getInstance().getReference().child("Images").child(proposition.getId());
+                        //StorageReference storageReference2 = storageReference.child(System.currentTimeMillis() + "." + GetFileExtension(uriImageSelected));
+                        UploadTask uploadTask = storageReference.putFile(uriImageSelected);
+                        uploadTask.addOnFailureListener(new OnFailureListener() {
+
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.d("error", "upload image failed");
+                                // TODO properly handle this error.
+                            }
+                        });
+
+                        uploadTask.addOnSuccessListener( new OnSuccessListener<UploadTask.TaskSnapshot>() {
+
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                // this is where we will end up if our image uploads successfully.
+                                proposition.setImageUrl(taskSnapshot.getMetadata().getReference().getDownloadUrl().toString());
+                            }
+                        });
+                    }
+                    Log.d("champ", proposition.getDescription() + " // " + des_zone.getText().toString());
                     intentProp.putExtra(PROP_DATA, JSONModel.serialize(proposition));
-                    setResult(CRE_OK,intentProp);
+                    setResult(CRE_OK, intentProp);
                     finish();
                 }
             });
         }
-
-        title_zone.setText(proposition.getTitle());
-        status_zone.setProgress(0,proposition.getStatus()==Status.ACCEPTABLE);
-        status_zone.setProgress(1,proposition.getStatus()==Status.GOOD);
-        status_zone.setProgress(2,proposition.getStatus()==Status.VERY_GOOD);
-        status_zone.setProgress(3,proposition.getStatus()==Status.NEW);
-        des_zone.setText(proposition.getDescription());
-        date_zone.setText(proposition.getValidDay());
-        price_zone.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        price_zone.setText(String.valueOf(proposition.getPrice()));
-
-
         title_zone.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -253,4 +289,11 @@ public class PropositionActivity extends AppCompatActivity {
         }
     }
 
+    public String GetFileExtension(Uri uri) {
+
+        ContentResolver contentResolver = getContentResolver();
+        MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+        return mimeTypeMap.getExtensionFromMimeType(contentResolver.getType(uri)) ;
+
+    }
 }

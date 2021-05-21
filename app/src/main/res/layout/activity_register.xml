@@ -8,6 +8,16 @@
     android:orientation="vertical"
     android:gravity="center_horizontal">
 
+    <ImageView
+        android:src="@drawable/profile"
+        android:layout_marginTop="20dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:id="@+id/img_profile"/>
+
+
+
+
     <EditText
         android:id="@+id/id"
         android:hint="id"
@@ -20,24 +30,25 @@
         android:inputType="textPassword"
         android:hint="password"
         android:id="@+id/password"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:layout_width="300dp"
         android:layout_height="50dp" />
 
+    <EditText
 
-    <Button
-        android:text="login"
-        android:id="@+id/login"
-        android:layout_marginTop="50dp"
+        android:hint="name"
+        android:id="@+id/name"
+        android:layout_marginTop="10dp"
         android:layout_width="300dp"
-        android:layout_height="wrap_content" />
+        android:layout_height="50dp" />
+
 
 
 
     <Button
         android:text="signup"
         android:id="@+id/signup"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="50dp"
         android:layout_width="300dp"
         android:layout_height="wrap_content" />
 
