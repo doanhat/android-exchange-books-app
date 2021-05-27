@@ -19,6 +19,7 @@ import com.example.donpoly.R;
 
 import com.example.donpoly.data.model.User;
 import com.example.donpoly.data.tools.FirebaseController;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -35,7 +36,7 @@ public class RegisterActivity extends AppCompatActivity {
     ImageView profile;
     Button btn;
     Uri imageUri;
-    private ProgressDialog mLoadingBar;
+    private ProgressDialog loadingBar;
 
 
     @Override
@@ -48,7 +49,7 @@ public class RegisterActivity extends AppCompatActivity {
         name=findViewById(R.id.name);
         profile=findViewById(R.id.img_profile);
         btn=findViewById(R.id.signup);
-        mLoadingBar=new ProgressDialog(RegisterActivity.this);
+        loadingBar=new ProgressDialog(RegisterActivity.this);
 
 
         btn.setOnClickListener(new View.OnClickListener() {
@@ -80,18 +81,22 @@ public class RegisterActivity extends AppCompatActivity {
         String passwordS = password.getText().toString();
         String nameS=name.getText().toString();
         if (email.length() == 0) {
-            id.setError("Enter an email address");
+            id.setError("Entrez une adresse email");
             return;
         }
 
         if (password.length() < 6) {
-            password.setError("Password must be at least 6 characters");
+            password.setError("Le mot de passe doit être au moins de 6 caractères");
             return;
         }
         if (nameS.length() ==0) {
-            password.setError("Enter a name");
+            password.setError("Entrez un nom");
             return;
         }
+        loadingBar.setTitle("Créer un nouveau compte");
+        loadingBar.setMessage("Veuillez patienter...");
+        loadingBar.setCanceledOnTouchOutside(true);
+        loadingBar.show();
         FirebaseAuth.getInstance().createUserWithEmailAndPassword(email,passwordS).addOnCompleteListener(this,new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -99,14 +104,42 @@ public class RegisterActivity extends AppCompatActivity {
 
                     final String uid=FirebaseAuth.getInstance().getCurrentUser().getUid();
 
+                    //final StorageReference storageReference= FirebaseStorage.getInstance().getReference().child("users/"+uid+"/"+imageUri.getLastPathSegment());
                     final StorageReference storageReference= FirebaseStorage.getInstance().getReference().child("users").child(uid);
                     UploadTask uploadTask = storageReference.putFile(imageUri);
-                    uploadTask.addOnFailureListener(new OnFailureListener() {
+                    User userModel=new User();
+                    userModel.setName(nameS);
+                    userModel.setUid(uid);
+                    Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                        @Override
+                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                            if (!task.isSuccessful()) {
+                                throw task.getException();
+                            }
+
+                            // Continue with the task to get the download URL
+                            return storageReference.getDownloadUrl();
+                        }
+                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            if (task.isSuccessful()) {
+                                Uri downloadUri = task.getResult();
+                                userModel.setImageurl(downloadUri.toString());
+                            } else {
+                                // Handle failures
+                                // ...
+                            }
+                        }
+                    });
+
+                    /*uploadTask.addOnFailureListener(new OnFailureListener() {
 
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Log.d("error", "upload image failed");
                             Toast.makeText(RegisterActivity.this,"upload profil image failed",Toast.LENGTH_SHORT).show();
+                            loadingBar.dismiss();
                         }
                     });
 
@@ -117,7 +150,28 @@ public class RegisterActivity extends AppCompatActivity {
                             User userModel=new User();
                             userModel.setName(nameS);
                             userModel.setUid(uid);
-                            userModel.setImageurl(taskSnapshot.getMetadata().getReference().getDownloadUrl().toString());
+                            //userModel.setImageurl(taskSnapshot.getMetadata().getReference().getDownloadUrl().toString());
+                            storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    // Got the download URL for 'users/me/profile.png' in uri
+                                    System.out.println(uri.toString());
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception exception) {
+                                    // Handle any errors
+                                }
+                            });
+                            /*Task<Uri> downloadUrl = storageReference.getDownloadUrl();
+                            downloadUrl.addOnSuccessListener(new OnSuccessListener<Uri>() {
+
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    String imageReference = uri.toString();
+                                    userModel.setImageurl(imageReference);
+                                }
+                            });*/
                             FirebaseController firebaseController = new FirebaseController("users");
                             DatabaseReference mDbUsers = firebaseController.getReferences().get("users");
                             mDbUsers.child(userModel.getUid()).setValue(userModel).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -126,6 +180,8 @@ public class RegisterActivity extends AppCompatActivity {
                                     // after the data addition is successful
                                     // we are displaying a success toast message.
                                     Toast.makeText(RegisterActivity.this, "Utilisateur ajoutée avec succès " + userModel.getUid(), Toast.LENGTH_SHORT).show();
+                                    loadingBar.dismiss();
+                                    finish();
                                 }
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
@@ -133,12 +189,14 @@ public class RegisterActivity extends AppCompatActivity {
                                     // this method is called when the data addition process is failed.
                                     // displaying a toast message when data addition is failed.
                                     Toast.makeText(RegisterActivity.this, "Echec lors de l'ajoute de l'Utilisateur \n" + e, Toast.LENGTH_SHORT).show();
+                                    loadingBar.dismiss();
                                 }
                             });
-                        }
-                    });
+                        //}
+                    //});
                 }else{
                     Toast.makeText(RegisterActivity.this,"Account creation failed",Toast.LENGTH_SHORT).show();
+                    loadingBar.dismiss();
                 }
             }
         });

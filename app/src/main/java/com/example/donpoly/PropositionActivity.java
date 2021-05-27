@@ -91,7 +91,6 @@ public class PropositionActivity extends AppCompatActivity {
         FloatingActionButton validate_button = findViewById(R.id.validate_button);
         Button add_photo_button = findViewById(R.id.add_photo_button);
         linearImageLayout = findViewById(R.id.image_zone);
-        storageReference = FirebaseStorage.getInstance().getReference("Images");
         if (intent.getIntExtra(PropositionAdapter.MODIFICATION, 0) == HomeFragment.PROP_MOD) {
             proposition = JSONModel.deserialize(intent.getStringExtra(PROP_DATA), Proposition.class);
             this.setTitle("Modifier la proposition");
@@ -131,7 +130,7 @@ public class PropositionActivity extends AppCompatActivity {
                     proposition.setPostedDay(proposition.getDateTimeFromCalendar(Calendar.getInstance()));
                     proposition.setAuthor(userid);
                     if (uriImageSelected != null) {
-                        final StorageReference storageReference= FirebaseStorage.getInstance().getReference().child("Images").child(proposition.getId());
+                        storageReference= FirebaseStorage.getInstance().getReference().child("Images").child(proposition.getId());
                         //StorageReference storageReference2 = storageReference.child(System.currentTimeMillis() + "." + GetFileExtension(uriImageSelected));
                         UploadTask uploadTask = storageReference.putFile(uriImageSelected);
                         uploadTask.addOnFailureListener(new OnFailureListener() {

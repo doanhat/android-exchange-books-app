@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">DonPoly</string>
     <string name="title_home">Acceuil</string>
-    <string name="title_messages">Messages</string>
+    <string name="title_messages">Contacts</string>
     <string name="title_profile">Profil</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
@@ -28,4 +28,6 @@
     <string name="cancel_button">Annuler</string>
     <string name="popup_title_permission_files_access">Permission</string>
     <string name="toast_title_no_image_chosen">Aucune image choisie</string>
+    <string name="button_title_send">Envoyer</string>
+    <string name="default_notification_channel_id">Admin</string>
 </resources>

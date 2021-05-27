@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +24,7 @@ import com.example.donpoly.R;
 import com.example.donpoly.data.model.Proposition;
 import com.example.donpoly.data.tools.FirebaseController;
 import com.example.donpoly.data.tools.JSONModel;
+import com.example.donpoly.ui.messages.MessageActivity;
 import com.example.donpoly.views.adapters.PropositionAdapter;
 import com.example.donpoly.views.listeners.RecyclerItemClickListener;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -41,8 +41,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
-
-import static com.example.donpoly.views.adapters.PropositionAdapter.MODIFICATION;
 
 public class HomeFragment extends Fragment {
 
@@ -78,7 +76,7 @@ public class HomeFragment extends Fragment {
         rvProps.setLayoutManager(new LinearLayoutManager(getContext()));
 
         rvProps.addOnItemTouchListener(new RecyclerItemClickListener(getContext(), rvProps ,new RecyclerItemClickListener.OnItemClickListener() {
-            @Override
+            /*@Override
             public void onItemClick(View view, int position) {
                 Proposition proposition = (Proposition) adapter.getItem(position);
                 Log.d("modify",proposition.getTitle());
@@ -87,6 +85,14 @@ public class HomeFragment extends Fragment {
                 intent.putExtra(HomeFragment.PROP_DATA, JSONModel.serialize(proposition));
                 intent.putExtra(MODIFICATION,PROP_MOD);
                 startActivityForResult(intent, PROP_MOD);
+            }*/
+            //creer chat one to one
+            @Override
+            public void onItemClick(View view, int position) {
+                Proposition proposition = (Proposition) adapter.getItem(position);
+                Intent intent = new Intent(getContext(), MessageActivity.class);
+                intent.putExtra("visitUserId",proposition.getAuthor());
+                startActivity(intent);
             }
 
             @Override
