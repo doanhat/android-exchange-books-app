@@ -10,57 +10,56 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
+import com.example.donpoly.MainActivity;
 import com.example.donpoly.R;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.example.donpoly.data.LoginDataSource;
+import com.example.donpoly.data.LoginRepository;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class ProfileFragment extends Fragment {
 
-    private ProfileViewModel profileViewModel;
-    private ImageView mImageView;
-    private TextView mTextView;
-    private Button mBtnProposition;
-    private Button mBtnCommande;
-    private Button mBtnDeconnect;
-
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        profileViewModel = new ViewModelProvider(this).get(ProfileViewModel.class);
-
         View root = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        //final TextView textView = root.findViewById(R.id.text_profile);
-        /*profileViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });*/
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        mBtnProposition = root.findViewById(R.id.btn_prop_profile);
-        mBtnCommande = root.findViewById(R.id.btn_commande_profile);
-        mImageView = root.findViewById(R.id.iv_photo_profile);
-        mTextView = root.findViewById(R.id.tv_name_profile);
-        mBtnDeconnect = root.findViewById(R.id.btn_deconnect);
+        final Button mBtnProposition = root.findViewById(R.id.btn_prop_profile);
+        final Button mBtnCommand = root.findViewById(R.id.btn_commande_profile);
+        final ImageView mImageView = root.findViewById(R.id.iv_photo_profile);
+        final TextView mTextView = root.findViewById(R.id.tv_name_profile);
+        mTextView.setText(user.getDisplayName());
+        final Button mBtnLogout = root.findViewById(R.id.btn_logout);
+
+        // set the image of user
+        Glide.with(ProfileFragment.this).load(user.getPhotoUrl()).into(mImageView);
 
         mBtnProposition.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(),PropositionActivity.class);
+                Intent intent = new Intent(getActivity(), MyPropositionActivity.class);
                 intent.putExtra("prop_or_comm","proposition");
                 startActivity(intent);
             }
         });
 
-        mBtnCommande.setOnClickListener(new View.OnClickListener() {
+        mBtnCommand.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(),PropositionActivity.class);
+                Intent intent = new Intent(getActivity(), MyPropositionActivity.class);
                 intent.putExtra("prop_or_comm","command");
                 startActivity(intent);
+            }
+        });
+
+        mBtnLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LoginRepository.getInstance(new LoginDataSource()).logout();
+                startActivity(new Intent(getActivity(), MainActivity.class));
             }
         });
 

@@ -13,11 +13,11 @@
 
     <ImageView
         android:id="@+id/iv_photo_login"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_marginTop="50dp"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/book0"/>
+        android:src="@drawable/profile"/>
 
     <LinearLayout
         android:id="@+id/ll_user_login"
@@ -97,20 +97,27 @@
         android:id="@+id/login"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_below="@id/ll_pwd_login"
         android:layout_marginTop="70dp"
         android:enabled="false"
-        android:text="@string/action_sign_in"/>
+        android:text="@string/action_sign_in"
+        android:layout_marginLeft="100dp" />
+
+    <Button
+        android:id="@+id/sign_up"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ll_pwd_login"
+        android:layout_marginTop="70dp"
+        android:layout_toRightOf="@+id/login"
+        android:text="@string/action_sign_up"/>
 
     <ProgressBar
         android:id="@+id/loading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="64dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginBottom="64dp"
+        android:layout_below="@+id/ll_pwd_login"
+        android:layout_marginTop="7dp"
+        android:layout_centerHorizontal="true"
         android:visibility="gone"/>
 </RelativeLayout>

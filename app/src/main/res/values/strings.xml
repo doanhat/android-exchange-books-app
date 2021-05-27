@@ -6,11 +6,31 @@
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in</string>
+    <string name="action_sign_in">Login</string>
+    <string name="action_sign_up">Registre</string>
     <string name="welcome">"Welcome !"</string>
-    <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
-    <string name="login_failed">"Login failed"</string>
+    <string name="invalid_username">Address email invalide</string>
+    <string name="invalid_password">Mot de pass doit être au moins 6 caractères</string>
+    <string name="login_failed">"Login échec"</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="database_path">https://nf28-donpoly-default-rtdb.europe-west1.firebasedatabase.app/</string>
+    <string name="title">Titre</string>
+    <string name="status">État</string>
+    <string name="status_0">ACCEPTABLE</string>
+    <string name="status_1">BON</string>
+    <string name="status_2">TRÈS BON</string>
+    <string name="status_3">NEUF</string>
+    <string name="description">Description</string>
+    <string name="description_zone">Description ici</string>
+    <string name="reset_button">Réinitialiser</string>
+    <string name="validate_button">Valider</string>
+    <string name="cancel_button">Annuler</string>
+    <string name="popup_title_permission_files_access">Permission</string>
+    <string name="toast_title_no_image_chosen">Aucune image choisie</string>
+    <string name="search_hint">Saisir le nom du poly recherché</string>
+    <string name="button_title_send">Envoyer</string>
+    <string name="default_notification_channel_id">Admin</string>
+
+
 </resources>

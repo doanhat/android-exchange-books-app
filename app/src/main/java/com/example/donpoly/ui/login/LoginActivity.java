@@ -1,17 +1,9 @@
 package com.example.donpoly.ui.login;
 
 import android.app.Activity;
-
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -24,10 +16,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.example.donpoly.MainActivity;
 import com.example.donpoly.R;
-import com.example.donpoly.ui.login.LoginViewModel;
-import com.example.donpoly.ui.login.LoginViewModelFactory;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -45,7 +41,12 @@ public class LoginActivity extends AppCompatActivity {
         final ImageView userDelete = findViewById(R.id.iv_icon_userDelete);
         final ImageView pwdDelete = findViewById(R.id.iv_icon_pwdDelete);
         final Button loginButton = findViewById(R.id.login);
+        final Button signUpButton = findViewById(R.id.sign_up);
         final ProgressBar loadingProgressBar = findViewById(R.id.loading);
+
+        usernameEditText.setText(getSharedPreferences("login", Context.MODE_PRIVATE).getString("username",""));
+        passwordEditText.setText(getSharedPreferences("login", Context.MODE_PRIVATE).getString("password",""));
+        loginViewModel.loginDataChanged(usernameEditText.getText().toString(),passwordEditText.getText().toString());
 
         loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {
             @Override
@@ -69,23 +70,21 @@ public class LoginActivity extends AppCompatActivity {
                 if (loginResult == null) {
                     return;
                 }
-                loadingProgressBar.setVisibility(View.GONE);
+                loadingProgressBar.setVisibility(View.VISIBLE);
                 if (loginResult.getError() != null) {
                     showLoginFailed(loginResult.getError());
                 }
+                // user login successfully
                 if (loginResult.getSuccess() != null) {
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    startActivity(intent);
+
                     updateUiWithUser(loginResult.getSuccess());
                 }
                 setResult(Activity.RESULT_OK);
 
-
-                Intent intent = new Intent(LoginActivity.this,
-                        MainActivity.class);
-                //intent.putExtra("number_activities",activities.size());
-                startActivity(intent);
-                //startActivityForResult(intent, TASK_CREATION);
                 //Complete and destroy login activity once successful
-                //finish();
+                finish();
             }
         });
 
@@ -159,6 +158,13 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        signUpButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+            }
+        });
+
         userDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -183,4 +189,6 @@ public class LoginActivity extends AppCompatActivity {
     private void showLoginFailed(@StringRes Integer errorString) {
         Toast.makeText(getApplicationContext(), errorString, Toast.LENGTH_SHORT).show();
     }
+
+
 }

@@ -6,20 +6,23 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import adapter.MyFragmentPagerAdapter;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
+
+import com.example.donpoly.data.LoginDataSource;
+import com.example.donpoly.data.LoginRepository;
 import com.example.donpoly.ui.home.HomeFragment;
 import com.example.donpoly.ui.login.LoginActivity;
 import com.example.donpoly.ui.messages.MessagesFragment;
 import com.example.donpoly.ui.profile.ProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.viewpager.widget.ViewPager;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import adapter.MyFragmentPagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,20 +31,12 @@ public class MainActivity extends AppCompatActivity {
     private MenuItem mMenuItem;
     private SharedPreferences sharedPreferences;
     private Boolean isLogin;
+//    private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        BottomNavigationView navView = findViewById(R.id.nav_view);
-//        // Passing each menu ID as a set of Ids because each
-//        // menu should be considered as top level destinations.
-//        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-//                R.id.navigation_home, R.id.navigation_messages, R.id.navigation_profil)
-//                .build();
-//        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-//        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-//        NavigationUI.setupWithNavController(navView, navController);
 
         initView();
         initData();
@@ -49,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initData() {
         sharedPreferences = getSharedPreferences("login", Context.MODE_PRIVATE);
-        isLogin = sharedPreferences.getBoolean("login",false);
+        isLogin = LoginRepository.getInstance(new LoginDataSource()).isLoggedIn();
     }
 
     private void initView() {

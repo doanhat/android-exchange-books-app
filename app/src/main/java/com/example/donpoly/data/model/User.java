@@ -1,34 +1,46 @@
 package com.example.donpoly.data.model;
 
-import java.util.UUID;
+import android.net.Uri;
 
 public class User {
 
-    private String id;
-    private String displayName;
+    private String uid;
+    private String name;
+    private Uri imageUri;
 
-    public User(String id, String displayName) {
-        this.id = UUID.randomUUID().toString();
-        this.displayName = displayName;
-    }
 
     public User() {
-        this.id = UUID.randomUUID().toString();
     }
 
-    public String getId() {
-        return id;
+    public User(String uid, String name, Uri imageUri) {
+        this.uid = uid;
+        this.name = name;
+        this.imageUri = imageUri;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public String getUid() {
+        return uid;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+
+    public String getName() {
+        return name;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Uri getImageUri() {
+        return imageUri;
+    }
+
+    public void setImageUri(Uri imageUri) {
+        this.imageUri = imageUri;
+    }
+
 }

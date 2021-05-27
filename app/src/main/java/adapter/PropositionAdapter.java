@@ -1,29 +1,50 @@
 package adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.donpoly.R;
+import com.bumptech.glide.Glide;
 import com.example.donpoly.data.model.Proposition;
+import com.example.donpoly.data.tools.JSONModel;
+import com.example.donpoly.ui.home.ShowPolyDetailActivity;
+import com.example.donpoly.ui.profile.ShowPropositionActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class PropositionAdapter extends RecyclerView.Adapter<PropositionAdapter.ViewHolder> {
+import static com.example.donpoly.R.id;
+import static com.example.donpoly.R.layout;
+
+public class PropositionAdapter extends RecyclerView.Adapter<PropositionAdapter.ViewHolder> implements Filterable {
+    private Context context;
+    private List<Proposition> mProps;
+    private List<Proposition> mSourceList;
+    private List<Proposition> mFilterList;
+
+    // Pass in the contact array into the constructor
+    public PropositionAdapter(List<Proposition> props) {
+        mProps = props;
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Context context = parent.getContext();
+        context = parent.getContext();
+
         LayoutInflater inflater = LayoutInflater.from(context);
 
         // Inflate the custom layout
-        View propView = inflater.inflate(R.layout.item_proposition, parent, false);
+        View propView = inflater.inflate(layout.item_proposition, parent, false);
 
         // Return a new holder instance
         return new ViewHolder(propView);
@@ -32,19 +53,63 @@ public class PropositionAdapter extends RecyclerView.Adapter<PropositionAdapter.
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         // Get the data model based on position
-        Proposition proposition = mProps.get(position);
+        Proposition proposition = mFilterList.get(position);
 
         // Set item views based on your views and data model
-        ImageView vProp_image = holder.prop_image;
-        TextView vProp_title = holder.prop_title;
-        vProp_title.setText(proposition.getTitle());
-        TextView vProp_price = holder.prop_price;
-        vProp_price.setText(String.valueOf(proposition.getPrice()));
+        Glide.with(context).load(proposition.getImageUrl()).into(holder.prop_image);
+        holder.prop_title.setText(proposition.getTitle());
+        holder.prop_price.setText(String.valueOf(proposition.getPrice()));
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, ShowPolyDetailActivity.class);
+                intent.putExtra(ShowPropositionActivity.SHOW, JSONModel.serialize(proposition));
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return mProps.size();
+        return mFilterList.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint) {
+                String charString = constraint.toString();
+                if (charString.isEmpty()){
+                    // no content to filter, we use the original data
+                    mFilterList = mSourceList;
+                }else {
+                    List<Proposition> filteredList = new ArrayList<>();
+                    for (Proposition pro:mSourceList) {
+                        // filter the name of propositions
+                        if (pro.getTitle().contains(charString)){
+                            filteredList.add(pro);
+                        }
+                    }
+                    mFilterList = filteredList;
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = mFilterList;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results) {
+                mFilterList = (ArrayList<Proposition>)results.values;
+                notifyDataSetChanged();
+            }
+        };
+    }
+
+    public void appendList(List<Proposition> list){
+        mSourceList = list;
+        mFilterList = list;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -55,16 +120,10 @@ public class PropositionAdapter extends RecyclerView.Adapter<PropositionAdapter.
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            prop_image = (ImageView) itemView.findViewById(R.id.prop_image);
-            prop_title = (TextView) itemView.findViewById(R.id.prop_title);
-            prop_price = (TextView) itemView.findViewById(R.id.prop_price);
+            prop_image = (ImageView) itemView.findViewById(id.prop_image);
+            prop_title = (TextView) itemView.findViewById(id.prop_title);
+            prop_price = (TextView) itemView.findViewById(id.prop_price);
         }
     }
 
-    private List<Proposition> mProps;
-
-    // Pass in the contact array into the constructor
-    public PropositionAdapter(List<Proposition> props) {
-        mProps = props;
-    }
 }

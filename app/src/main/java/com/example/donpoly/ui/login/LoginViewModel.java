@@ -1,15 +1,15 @@
 package com.example.donpoly.ui.login;
 
+import android.util.Patterns;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import android.util.Patterns;
-
+import com.example.donpoly.R;
 import com.example.donpoly.data.LoginRepository;
 import com.example.donpoly.data.Result;
 import com.example.donpoly.data.model.LoggedInUser;
-import com.example.donpoly.R;
 
 public class LoginViewModel extends ViewModel {
 
@@ -20,6 +20,7 @@ public class LoginViewModel extends ViewModel {
     LoginViewModel(LoginRepository loginRepository) {
         this.loginRepository = loginRepository;
     }
+
 
     LiveData<LoginFormState> getLoginFormState() {
         return loginFormState;

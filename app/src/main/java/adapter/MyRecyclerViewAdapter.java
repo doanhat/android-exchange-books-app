@@ -1,5 +1,6 @@
 package adapter;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,22 +15,33 @@ import com.example.donpoly.data.model.Proposition;
 import java.util.List;
 
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
+    private Context context;
+    private OnItemClickListener itemClickListener;
     private List<Proposition> propositionList;
 
-    public MyRecyclerViewAdapter(List<Proposition> propositionList){
+    public MyRecyclerViewAdapter(List<Proposition> propositionList, OnItemClickListener listener){
         this.propositionList = propositionList;
+        this.itemClickListener = listener;
     }
 
     @NonNull
     @Override
-    public MyRecyclerViewAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.prop_comm_item, parent, false));
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        context = parent.getContext();
+        return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.prop_comm_item, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyRecyclerViewAdapter.ViewHolder holder, int position) {
-        holder.getPoly().setText(propositionList.get(position).getTitle());
-        holder.getDate().setText(propositionList.get(position).getPostedDay());
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Proposition proposition = propositionList.get(position);
+        holder.poly.setText(proposition.getTitle());
+        holder.date.setText(proposition.getPostedDay());
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                itemClickListener.onClick(position);
+            }
+        });
     }
 
     @Override
@@ -38,21 +50,17 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView poly;
-        private final TextView date;
+        public TextView poly;
+        public TextView date;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             poly = itemView.findViewById(R.id.tv_poly_item);
             date = itemView.findViewById(R.id.tv_date_item);
         }
+    }
 
-        public TextView getPoly(){
-            return poly;
-        }
-
-        public TextView getDate(){
-            return date;
-        }
+    public interface OnItemClickListener{
+        void onClick(int pos);
     }
 }

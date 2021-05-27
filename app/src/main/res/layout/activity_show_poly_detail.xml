@@ -1,67 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="20dp"
-    tools:context=".ui.profile.PolyActivity">
+    tools:context=".ui.home.ShowPolyDetailActivity">
 
     <ImageView
-        android:id="@+id/iv_photo_poly"
-        android:layout_width="180dp"
-        android:layout_height="180dp"
+        android:id="@+id/iv_photo_detail_poly"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_gravity="center"
-        android:layout_marginTop="10dp"
         android:src="@drawable/book"/>
 
     <TextView
-        android:id="@+id/tv_name_poly"
+        android:id="@+id/tv_name_detail_poly"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="RO05"
+        android:hint="Nom Poly"
         android:textColor="@color/black"
-        android:textSize="30sp"
+        android:textSize="15sp"
+        android:textAllCaps="true"
+        android:gravity="center_horizontal"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"/>
 
-    <EditText
-        android:id="@+id/et_condition_poly"
-        android:layout_width="200dp"
+    <TextView
+        android:id="@+id/tv_condition_detail_poly"
+        android:layout_width="180dp"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
         android:text="Bon état"
-        android:textSize="20sp"
+        android:textSize="15sp"
         android:textColor="@color/black"
-        android:layout_marginTop="10dp"
-        android:enabled="false"
         android:background="@null"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="10dp">
+        android:layout_marginLeft="20dp">
 
-        <EditText
-            android:id="@+id/et_note_poly"
-            android:layout_width="200dp"
+        <TextView
+            android:id="@+id/tv_note_detail_poly"
+            android:layout_width="180dp"
             android:layout_height="wrap_content"
             android:text="Sans note avec TD"
-            android:textSize="20sp"
+            android:textSize="15sp"
             android:textColor="@color/black"
-            android:enabled="false"
             android:background="@null"/>
 
-        <EditText
-            android:id="@+id/et_price_poly"
+        <TextView
+            android:id="@+id/tv_price_detail_poly"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
             android:text="0"
             android:textColor="@color/black"
             android:gravity="center"
-            android:layout_marginLeft="100dp"
-            android:textSize="20sp"
-            android:enabled="false"
+            android:layout_marginLeft="60dp"
+            android:textSize="15sp"
             android:background="@null"/>
 
         <TextView
@@ -69,32 +67,31 @@
             android:layout_height="wrap_content"
             android:text="€"
             android:textColor="@color/black"
-            android:textSize="25sp"/>
+            android:textSize="20sp"/>
     </LinearLayout>
 
     <Button
-        android:id="@+id/btn_edit_poly"
-        android:layout_width="300dp"
-        android:layout_height="45dp"
+        android:id="@+id/btn_chat_detail_poly"
+        android:layout_width="250dp"
+        android:layout_height="35dp"
         android:layout_gravity="center"
         android:layout_marginTop="20dp"
-        android:text="Edit"
+        android:text="Envoyer un message"
         android:textColor="@color/teal_700"
         android:textSize="19sp"
         android:textAllCaps="false"
         android:background="@drawable/btn_border"/>
 
     <Button
-        android:id="@+id/btn_delete_poly"
-        android:layout_width="300dp"
-        android:layout_height="45dp"
+        android:id="@+id/btn_buy_detail_poly"
+        android:layout_width="250dp"
+        android:layout_height="35dp"
         android:layout_gravity="center"
         android:layout_marginTop="8dp"
-        android:text="Supprimer cette proposition"
+        android:text="Achter"
         android:textSize="19sp"
+        android:textColor="@color/white"
         android:textAllCaps="false"
-        android:background="@color/red"
-        android:onClick="delete"/>
-
+        android:background="@color/green"/>
 
 </LinearLayout>

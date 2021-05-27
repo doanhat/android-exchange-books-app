@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.donpoly">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -12,8 +13,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DonPoly">
-        <activity android:name=".ui.profile.PolyActivity"></activity>
-        <activity android:name=".ui.profile.PropositionActivity" />
+        <activity android:name=".ui.messages.MessageActivity"></activity>
+        <activity
+            android:name=".ui.home.ShowPolyDetailActivity"
+            android:label=""
+            android:theme="@style/DialogStyle"></activity>
+        <activity android:name=".ui.login.RegisterActivity" />
+        <activity android:name=".ui.home.AddPropositionActivity" />
+        <activity
+            android:name=".ui.profile.ShowPropositionActivity"
+            android:label=""
+            android:theme="@style/DialogStyle" />
+        <activity android:name=".ui.profile.MyPropositionActivity" />
         <activity
             android:name=".ui.login.LoginActivity"
             android:label="@string/title_activity_login" />
