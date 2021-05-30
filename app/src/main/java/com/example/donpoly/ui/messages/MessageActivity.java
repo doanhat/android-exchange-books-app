@@ -12,9 +12,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -65,6 +67,17 @@ public class MessageActivity extends AppCompatActivity {
         sendBtn=findViewById(R.id.btn_send);
         editText=findViewById(R.id.text_send);
 
+        //toolbar
+        Toolbar toolbar=findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                finish();
+            }
+        });
+
         //RecyclerView
         recyclerView=findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
@@ -105,6 +118,8 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
     }
+
+
     private void sendMessage(String sender,String receiver,String message){
         FirebaseController firebaseController = new FirebaseController("chats");
         DatabaseReference mDbUsers = firebaseController.getReferences().get("chats");
