@@ -41,8 +41,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 
 public class HomeFragment extends Fragment {
 
@@ -155,12 +159,27 @@ public class HomeFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 propositions.clear();
-
+                Boolean valid=true;
+                DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                Date date = new Date();
+                String dateCurrent= dateFormat.format(date);
                 for (DataSnapshot postSnapshot: snapshot.getChildren()) {
                     Proposition prop = postSnapshot.getValue(Proposition.class);
                     assert prop != null;
-                    propositions.add(0,prop);
-                    Log.e("Get Data", prop.getId());
+                    valid=true;
+                    if(prop.getValidDay()!=null){
+                        try {
+                            if(!dateFormat.parse(dateCurrent).before(dateFormat.parse(prop.getValidDay()))){
+                                valid=false;
+                            }
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if(prop.getTaker().equals("default")&&valid==true) {
+                        propositions.add(0, prop);
+                        Log.e("Get Data", prop.getId());
+                    }
                 }
                 Collections.sort(propositions);
                 adapter.notifyDataSetChanged();
