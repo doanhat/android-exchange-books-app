@@ -32,6 +32,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -87,12 +89,27 @@ public class HomeFragment extends Fragment {
                 startActivityForResult(intent, PROP_MOD);
             }*/
             //creer chat one to one
-            @Override
+            /*@Override
             public void onItemClick(View view, int position) {
                 Proposition proposition = (Proposition) adapter.getItem(position);
                 Intent intent = new Intent(getContext(), MessageActivity.class);
                 intent.putExtra("visitUserId",proposition.getAuthor());
                 startActivity(intent);
+            }*/
+            //take a proposition
+            @Override
+            public void onItemClick(View view, int position) {
+                FirebaseUser fuser = FirebaseAuth.getInstance().getCurrentUser();
+                Proposition proposition = (Proposition) adapter.getItem(position);
+                FirebaseController firebaseController = new FirebaseController("propositions");
+                DatabaseReference mDbPropos = firebaseController.getReferences().get("propositions");
+                mDbPropos.child(proposition.getId()).child("taker").setValue(fuser.getUid());
+                String TextTaken="!SHOTGUN! Je veux bien celui de "+proposition.getTitle();
+                Intent intent = new Intent(getContext(), MessageActivity.class);
+                intent.putExtra("visitUserId",proposition.getAuthor());
+                intent.putExtra("TextToSend",TextTaken);
+                startActivity(intent);
+
             }
 
             @Override

@@ -54,6 +54,7 @@ public class MessageActivity extends AppCompatActivity {
     MessageAdapter messageAdapter;
     List<Chat> mchat;
     String userid;
+    String textToSend;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -87,6 +88,11 @@ public class MessageActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
         intent=getIntent();
         userid=intent.getStringExtra("visitUserId");
+        //if it is to send a proposition taken message
+        textToSend=intent.getStringExtra("TextToSend");
+        if(textToSend!=null){
+            sendMessage(fuser.getUid(),userid,textToSend);
+        }
         FirebaseController firebaseController = new FirebaseController("users");
         DatabaseReference mDbUsers = firebaseController.getReferences().get("users").child(userid);
         mDbUsers.addValueEventListener(new ValueEventListener() {

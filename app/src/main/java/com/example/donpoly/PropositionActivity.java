@@ -34,6 +34,8 @@ import com.example.donpoly.data.model.Proposition;
 import com.example.donpoly.data.tools.JSONModel;
 import com.example.donpoly.data.tools.Status;
 import com.example.donpoly.ui.home.HomeFragment;
+import com.example.donpoly.ui.login.LoginActivity;
+import com.example.donpoly.ui.messages.MessageActivity;
 import com.example.donpoly.views.adapters.PropositionAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -74,7 +76,8 @@ public class PropositionActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
-            //TODO:no user signed
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
         }
         String userid = user.getUid();
         super.onCreate(savedInstanceState);
@@ -129,6 +132,7 @@ public class PropositionActivity extends AppCompatActivity {
                     proposition.setValidDay(date_zone.getText().toString());
                     proposition.setPostedDay(proposition.getDateTimeFromCalendar(Calendar.getInstance()));
                     proposition.setAuthor(userid);
+                    proposition.setTaker("default");
                     if (uriImageSelected != null) {
                         storageReference= FirebaseStorage.getInstance().getReference().child("Images").child(proposition.getId());
                         //StorageReference storageReference2 = storageReference.child(System.currentTimeMillis() + "." + GetFileExtension(uriImageSelected));
