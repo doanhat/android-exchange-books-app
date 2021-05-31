@@ -224,6 +224,7 @@ public class PropositionActivity extends AppCompatActivity {
                                 proposition.setValidDay(date_zone.getText().toString());
                             }
                         }, mYear, mMonth, mDay);
+                datePickerDialog.getDatePicker().setMinDate(c.getTimeInMillis());
                 datePickerDialog.show();
             }
         });
