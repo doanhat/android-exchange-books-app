@@ -49,7 +49,8 @@ public class ChatsFragment extends Fragment {
         fuser = FirebaseAuth.getInstance().getCurrentUser();
         usersList = new ArrayList<>();
         FirebaseController firebaseController2 = new FirebaseController("ChatList");
-        DatabaseReference mDbChatsList = firebaseController2.getReferences().get("ChatList").child(fuser.getUid());
+        DatabaseReference mDbChatsList = firebaseController2.getReferences().get("ChatList");
+        assert mDbChatsList != null;
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getContext(), recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
@@ -64,7 +65,7 @@ public class ChatsFragment extends Fragment {
 
             }
         }));
-        mDbChatsList.addValueEventListener(new ValueEventListener() {
+        mDbChatsList.child(fuser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
