@@ -12,9 +12,18 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.donpoly.R;
+import com.example.donpoly.data.model.Chatlist;
 import com.example.donpoly.data.model.Proposition;
 import com.example.donpoly.data.model.User;
+import com.example.donpoly.data.tools.FirebaseController;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.Date;
 import java.util.List;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
@@ -43,6 +52,27 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         }else{
             Glide.with(context).load(user.getImageurl()).into(holder.imageView);
         }*/
+        //unread message
+        FirebaseUser fuser = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseController firebaseController2 = new FirebaseController("ChatList");
+        DatabaseReference mDbChatsList = firebaseController2.getReferences().get("ChatList");
+        assert mDbChatsList != null;
+        mDbChatsList.child(fuser.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()){
+                    String flagUnread=(String) snapshot.child(user.getUid()).child("unread").getValue();
+                    if(flagUnread.equals("true")){
+                        holder.imageViewUnread.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     @Override
@@ -53,12 +83,14 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     public class ViewHolder extends RecyclerView.ViewHolder{
         public TextView username;
         public ImageView imageView;
+        public ImageView imageViewUnread;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
             username=itemView.findViewById(R.id.textView30);
             imageView=itemView.findViewById(R.id.imageView30);
+            imageViewUnread=itemView.findViewById(R.id.imageViewUnread);
         }
     }
 

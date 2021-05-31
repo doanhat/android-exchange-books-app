@@ -25,6 +25,7 @@ import com.example.donpoly.R;
 import com.example.donpoly.data.model.Chat;
 import com.example.donpoly.data.model.Proposition;
 import com.example.donpoly.data.tools.FirebaseController;
+import com.example.donpoly.ui.login.LoginActivity;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -34,6 +35,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.security.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -75,7 +77,8 @@ public class MessageActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                finish();
+                Intent intent = new Intent(MessageActivity.this, ChatsFragment.class);
+                startActivity(intent);
             }
         });
 
@@ -147,6 +150,8 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
         //adding user to chat fragment latest chats with contacts
+        Long tsLong = System.currentTimeMillis()/1000;
+        String ts = tsLong.toString();
         FirebaseController firebaseController2 = new FirebaseController("ChatList");
         DatabaseReference mDbChatsList = firebaseController2.getReferences().get("ChatList").child(fuser.getUid()).child(userid);
         mDbChatsList.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -155,6 +160,7 @@ public class MessageActivity extends AppCompatActivity {
                 if(!snapshot.exists()){
                     mDbChatsList.child("id").setValue(userid);
                 }
+                mDbChatsList.child("recentTime").setValue(ts);
             }
 
             @Override
@@ -169,6 +175,8 @@ public class MessageActivity extends AppCompatActivity {
                 if(!snapshot.exists()){
                     mDbChatsList2.child("id").setValue(fuser.getUid());
                 }
+                mDbChatsList2.child("unread").setValue("true");
+                mDbChatsList2.child("recentTime").setValue(ts);
             }
 
             @Override
@@ -197,6 +205,21 @@ public class MessageActivity extends AppCompatActivity {
                     messageAdapter=new MessageAdapter(MessageActivity.this,mchat,imageurl);
                     recyclerView.setAdapter(messageAdapter);
                 }
+                FirebaseController firebaseController4 = new FirebaseController("ChatList");
+                DatabaseReference mDbChatsList3 = firebaseController4.getReferences().get("ChatList").child(fuser.getUid()).child(userid);
+                mDbChatsList3.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.exists()){
+                            mDbChatsList3.child("unread").setValue("false");
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
             }
 
             @Override

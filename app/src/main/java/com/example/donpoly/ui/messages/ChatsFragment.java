@@ -2,6 +2,7 @@ package com.example.donpoly.ui.messages;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.donpoly.R;
 import com.example.donpoly.data.model.Chatlist;
-import com.example.donpoly.data.model.Proposition;
 import com.example.donpoly.data.model.User;
 import com.example.donpoly.data.tools.FirebaseController;
 import com.example.donpoly.views.listeners.RecyclerItemClickListener;
@@ -23,9 +23,11 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ChatsFragment extends Fragment {
@@ -65,7 +67,8 @@ public class ChatsFragment extends Fragment {
 
             }
         }));
-        mDbChatsList.child(fuser.getUid()).addValueEventListener(new ValueEventListener() {
+        Query orderRef=mDbChatsList.child(fuser.getUid()).orderByChild("recentTime");
+        ValueEventListener valueEventListener= new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
@@ -73,8 +76,10 @@ public class ChatsFragment extends Fragment {
                 //loop for all users
                 for (DataSnapshot snapshotItem : snapshot.getChildren()) {
                     Chatlist chatlist = snapshotItem.getValue(Chatlist.class);
+                    Log.d("TAG", chatlist.getId());
                     usersList.add(chatlist);
                 }
+                Collections.reverse(usersList);
                 chatList();
             }
 
@@ -82,7 +87,8 @@ public class ChatsFragment extends Fragment {
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
-        });
+        };
+        orderRef.addListenerForSingleValueEvent(valueEventListener);
         return view;
     }
 
@@ -95,11 +101,12 @@ public class ChatsFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 mUsers.clear();
-                for(DataSnapshot snapshotItem:snapshot.getChildren()){
-                    User user=snapshotItem.getValue(User.class);
-                    for(Chatlist chatlist:usersList){
-                        if(user.getUid().equals(chatlist.getId())){
+                for(Chatlist chatlist:usersList){
+                    for(DataSnapshot snapshotItem:snapshot.getChildren()) {
+                        User user = snapshotItem.getValue(User.class);
+                        if (user.getUid().equals(chatlist.getId())) {
                             mUsers.add(user);
+                            break;
                         }
                     }
                 }
