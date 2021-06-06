@@ -10,8 +10,7 @@
         android:id="@+id/iv_photo_poly"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_gravity="center"
-        android:src="@drawable/book"/>
+        android:layout_gravity="center"/>
 
     <TextView
         android:id="@+id/tv_name_poly"

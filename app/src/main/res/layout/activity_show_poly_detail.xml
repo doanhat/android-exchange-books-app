@@ -11,8 +11,7 @@
         android:id="@+id/iv_photo_detail_poly"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_gravity="center"
-        android:src="@drawable/book"/>
+        android:layout_gravity="center"/>
 
     <TextView
         android:id="@+id/tv_name_detail_poly"
@@ -49,7 +48,7 @@
             android:text="Sans note avec TD"
             android:textSize="15sp"
             android:textColor="@color/black"
-            android:background="@null"/>
+            android:background="@null" />
 
         <TextView
             android:id="@+id/tv_price_detail_poly"

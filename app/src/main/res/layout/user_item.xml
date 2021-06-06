@@ -30,4 +30,15 @@
         android:text="TextView"
         app:layout_constraintStart_toEndOf="@+id/imageView30"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageViewUnread"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginRight="0dp"
+        android:layout_weight="1"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/red_point" />
+
 </LinearLayout>

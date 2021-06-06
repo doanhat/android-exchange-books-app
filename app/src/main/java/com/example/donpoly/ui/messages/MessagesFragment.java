@@ -21,6 +21,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -49,8 +50,34 @@ public class MessagesFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         fuser = FirebaseAuth.getInstance().getCurrentUser();
         usersList = new ArrayList<>();
-        DatabaseReference mDbChatsList = FirebaseDatabase.getInstance(getString(R.string.database_path))
-                .getReference().child("ChatList").child(fuser.getUid());
+
+        if (fuser != null){
+            DatabaseReference mDbChatsList = FirebaseDatabase.getInstance(getString(R.string.database_path))
+                    .getReference().child("ChatList");
+            assert mDbChatsList != null;
+            Query orderRef=mDbChatsList.child(fuser.getUid()).orderByChild("recentTime");
+            ValueEventListener valueEventListener= new ValueEventListener() {
+
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                    usersList.clear();
+                    //loop for all users
+                    for (DataSnapshot snapshotItem : snapshot.getChildren()) {
+                        Chatlist chatlist = snapshotItem.getValue(Chatlist.class);
+                        usersList.add(chatlist);
+                    }
+                    chatList();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            };
+            orderRef.addListenerForSingleValueEvent(valueEventListener);
+        }
+
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getContext(), recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
@@ -65,24 +92,7 @@ public class MessagesFragment extends Fragment {
 
             }
         }));
-        mDbChatsList.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                usersList.clear();
-                //loop for all users
-                for (DataSnapshot snapshotItem : snapshot.getChildren()) {
-                    Chatlist chatlist = snapshotItem.getValue(Chatlist.class);
-                    usersList.add(chatlist);
-                }
-                chatList();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
         return root;
     }
 
@@ -95,14 +105,16 @@ public class MessagesFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 mUsers.clear();
-                for(DataSnapshot snapshotItem:snapshot.getChildren()){
-                    User user=snapshotItem.getValue(User.class);
-                    for(Chatlist chatlist:usersList){
-                        if(user.getUid().equals(chatlist.getId())){
+                for(Chatlist chatlist:usersList){
+                    for(DataSnapshot snapshotItem:snapshot.getChildren()) {
+                        User user = snapshotItem.getValue(User.class);
+                        if (user.getUid().equals(chatlist.getId())) {
                             mUsers.add(user);
+                            break;
                         }
                     }
                 }
+
                 userAdapter=new UserAdapter(getContext(),mUsers);
                 recyclerView.setAdapter(userAdapter);
             }

@@ -1,4 +1,5 @@
 package com.example.donpoly.data.model;
+
 import android.annotation.SuppressLint;
 
 import com.example.donpoly.data.tools.JSONModel;
@@ -7,7 +8,6 @@ import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.UUID;
@@ -26,7 +26,7 @@ public class Proposition extends JSONModel implements Comparable<Proposition>{
     private String taker;
     private String imageUrl;
 
-    public Proposition(String title, Status status, String description, String postedDay, String validDay, float price, boolean exchangeable, String author, String taker,String image) {
+    public Proposition(String title, Status status, String description, String postedDay, String validDay, float price, boolean exchangeable, String author, String taker, String image) {
         this.title = title;
         this.status = status;
         this.description = description;
@@ -52,14 +52,6 @@ public class Proposition extends JSONModel implements Comparable<Proposition>{
         this.taker = null;
         this.id = UUID.randomUUID().toString();
         this.imageUrl=null;
-    }
-
-    public static ArrayList<Proposition> createDummies(int i) {
-        ArrayList<Proposition> lProps = new ArrayList<>();
-        for (int j = 0; j < i; j++) {
-            lProps.add(new Proposition());
-        }
-        return lProps;
     }
 
 
@@ -143,6 +135,14 @@ public class Proposition extends JSONModel implements Comparable<Proposition>{
         this.id = id;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
 
 
     //@SuppressLint("DefaultLocale")
@@ -200,12 +200,5 @@ public class Proposition extends JSONModel implements Comparable<Proposition>{
         return 0;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
 }
 

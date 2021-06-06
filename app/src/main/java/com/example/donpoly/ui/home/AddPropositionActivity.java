@@ -1,9 +1,7 @@
 package com.example.donpoly.ui.home;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -11,21 +9,18 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.InputType;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SeekBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.bumptech.glide.Glide;
 import com.example.donpoly.R;
 import com.example.donpoly.data.model.Proposition;
 import com.example.donpoly.data.tools.JSONModel;
@@ -94,20 +89,11 @@ public class AddPropositionActivity extends AppCompatActivity {
             validate_button.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Intent intentProp = new Intent();
-                    proposition.setTitle(title_zone.getText().toString());
+
+                    proposition.setAuthor(userId);
+                    proposition.setTitle(title_zone.getText().toString().toUpperCase());
                     proposition.setDescription(des_zone.getText().toString());
                     proposition.setPrice(Float.parseFloat(price_zone.getText().toString()));
-                    proposition.setValidDay(date_zone.getText().toString());
-                    proposition.setPostedDay(proposition.getDateTimeFromCalendar(Calendar.getInstance()));
-                    proposition.setAuthor(userId);
-
-                    if (uriImageSelected == null) {
-                        uriImageSelected = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE
-                                + "://"+getResources().getResourcePackageName(R.drawable.book)
-                                + "/" + getResources().getResourceTypeName(R.drawable.book)
-                                + "/" + getResources().getResourceEntryName(R.drawable.book));
-                        proposition.setImageUrl(uriImageSelected.toString());
-                    }
 
                     Log.d("champ", proposition.getDescription() + " // " + des_zone.getText().toString());
                     intentProp.putExtra(HomeFragment.CREATE, JSONModel.serialize(proposition));
@@ -142,7 +128,7 @@ public class AddPropositionActivity extends AppCompatActivity {
             validate_button.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     Intent intentProp = new Intent(AddPropositionActivity.this, ShowPropositionActivity.class);
-                    proposition.setTitle(title_zone.getText().toString());
+                    proposition.setTitle(title_zone.getText().toString().toUpperCase());
                     proposition.setDescription(des_zone.getText().toString());
                     proposition.setPrice(Float.parseFloat(price_zone.getText().toString()));
                     proposition.setPostedDay(proposition.getDateTimeFromCalendar(Calendar.getInstance()));
@@ -153,15 +139,6 @@ public class AddPropositionActivity extends AppCompatActivity {
                 }
             });
         }
-
-
-        title_zone.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                proposition.setTitle(title_zone.getText().toString());
-                return false;
-            }
-        });
 
         status_zone.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -188,14 +165,6 @@ public class AddPropositionActivity extends AppCompatActivity {
             }
         });
 
-        des_zone.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                proposition.setDescription(des_zone.getText().toString());
-                return false;
-            }
-        });
-
         date_picker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -205,27 +174,19 @@ public class AddPropositionActivity extends AppCompatActivity {
                 mMonth = c.get(Calendar.MONTH);
                 mDay = c.get(Calendar.DAY_OF_MONTH);
 
-
-                DatePickerDialog datePickerDialog = new DatePickerDialog(AddPropositionActivity.this,
-                        new DatePickerDialog.OnDateSetListener() {
-                    @SuppressLint({"SetTextI18n", "DefaultLocale"})
+                DatePickerDialog datePickerDialog = new DatePickerDialog(AddPropositionActivity.this, new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                         date_zone.setText(String.format("%s/%s/%s",
                                 String.format("%02d", dayOfMonth),
                                 String.format("%02d", monthOfYear + 1),
                                 String.format("%02d", year)));
-                        proposition.setValidDay(date_zone.getText().toString()); }
-                        }, mYear, mMonth, mDay);
+                    }
+                }, mYear, mMonth, mDay);
+                datePickerDialog.getDatePicker().setMinDate(c.getTimeInMillis());
                 datePickerDialog.show();
-            }
-        });
 
-        price_zone.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                proposition.setPrice(Float.parseFloat(price_zone.getText().toString()));
-                return false;
+                proposition.setValidDay(date_zone.getText().toString());
             }
         });
 
@@ -254,9 +215,10 @@ public class AddPropositionActivity extends AppCompatActivity {
         if (requestCode == RC_CHOOSE_PHOTO) {
             if (resultCode == RESULT_OK) { //SUCCESS
                 this.uriImageSelected = data.getData();
-                Glide.with(AddPropositionActivity.this).load(uriImageSelected).into(mImageView);
-                proposition.setImageUrl(uriImageSelected.toString());
+                mImageView.setImageURI(uriImageSelected);
 
+
+                // upload pictures of polys
                 UploadTask uploadTask = storageReference.child(proposition.getId()).putFile(uriImageSelected);
 
                 uploadTask.addOnFailureListener(new OnFailureListener() {

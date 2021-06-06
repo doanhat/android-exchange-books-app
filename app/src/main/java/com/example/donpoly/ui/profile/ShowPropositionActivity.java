@@ -1,6 +1,10 @@
 package com.example.donpoly.ui.profile;
 
+import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.Gravity;
@@ -14,8 +18,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.example.donpoly.R;
 import com.example.donpoly.data.model.Proposition;
 import com.example.donpoly.data.tools.JSONModel;
@@ -23,6 +29,13 @@ import com.example.donpoly.ui.home.AddPropositionActivity;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 public class ShowPropositionActivity extends AppCompatActivity {
     private Button btnEdit;
@@ -35,9 +48,10 @@ public class ShowPropositionActivity extends AppCompatActivity {
     private Proposition proposition;
     public static final String SHOW = "show";
     public static final String MODIFICATION = "modification";
-    public static final String DELETE = "delete";
     public static final int PROP_MOD = 0;
+    private String p_c;
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,14 +71,53 @@ public class ShowPropositionActivity extends AppCompatActivity {
     }
 
 
+    @SuppressLint("ResourceAsColor")
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void initData() {
         Intent intent = getIntent();
         proposition = JSONModel.deserialize(intent.getStringExtra(SHOW), Proposition.class);
+        p_c = intent.getStringExtra("p_c");
+        if (p_c.equals("command")){
+            btnEdit.setEnabled(false);
+            btnEdit.setTextColor(R.color.gray);
+            btnDelete.setEnabled(false);
+            btnDelete.setBackground(getDrawable(R.color.gray));
+        }
+
+        // if the valid day is already past, you can't change anything
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            Date date = simpleDateFormat.parse(proposition.getValidDay());
+            if (date.before(Calendar.getInstance().getTime())){
+                btnEdit.setEnabled(false);
+                btnEdit.setTextColor(R.color.gray);
+                btnDelete.setEnabled(false);
+                btnDelete.setBackground(getDrawable(R.color.gray));
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         updateData();
     }
 
     public void updateData(){
-        //        ivPhoto.setImageURI(Uri.parse(proposition.getImageUrl()));
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference("Images").child(proposition.getId());
+        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Glide.with(getApplicationContext()).load(uri).into(ivPhoto);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Uri uri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE
+                        + "://"+getResources().getResourcePackageName(R.drawable.book)
+                        + "/" + getResources().getResourceTypeName(R.drawable.book)
+                        + "/" + getResources().getResourceEntryName(R.drawable.book));
+                Glide.with(getApplicationContext()).load(uri).into(ivPhoto);
+            }
+        });
         tvNamePoly.setText(proposition.getTitle());
         switch (proposition.getStatus()){
             case ACCEPTABLE:
@@ -80,7 +133,7 @@ public class ShowPropositionActivity extends AppCompatActivity {
                 tvStatus.setText(R.string.status_3);
                 break;
         }
-        tvDescription.setText(proposition.getDescription());
+        tvDescription.setText(proposition.getDescription().toUpperCase());
         tvPrice.setText(String.valueOf(proposition.getPrice()));
     }
 
@@ -107,9 +160,9 @@ public class ShowPropositionActivity extends AppCompatActivity {
         btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ShowPropositionActivity.this, MyPropositionActivity.class);
-                intent.putExtra(DELETE,proposition.getId());
-                startActivity(intent);
+                FirebaseDatabase.getInstance(getString(R.string.database_path)).getReference()
+                        .child("propositions").child(proposition.getId()).removeValue();
+                finish();
             }
         });
     }

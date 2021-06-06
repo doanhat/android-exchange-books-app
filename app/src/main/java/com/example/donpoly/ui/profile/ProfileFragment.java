@@ -1,6 +1,7 @@
 package com.example.donpoly.ui.profile;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,8 +18,11 @@ import com.example.donpoly.MainActivity;
 import com.example.donpoly.R;
 import com.example.donpoly.data.LoginDataSource;
 import com.example.donpoly.data.LoginRepository;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 public class ProfileFragment extends Fragment {
 
@@ -33,9 +37,14 @@ public class ProfileFragment extends Fragment {
         final TextView mTextView = root.findViewById(R.id.tv_name_profile);
         mTextView.setText(user.getDisplayName());
         final Button mBtnLogout = root.findViewById(R.id.btn_logout);
-
         // set the image of user
-        Glide.with(ProfileFragment.this).load(user.getPhotoUrl()).into(mImageView);
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference("users").child(user.getUid());
+        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Glide.with(getContext()).load(uri).into(mImageView);
+            }
+        });
 
         mBtnProposition.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -36,8 +36,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.annotations.Nullable;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import adapter.PropositionAdapter;
@@ -48,6 +52,7 @@ public class HomeFragment extends Fragment {
     public static final String CREATE = "create";
     private HomeViewModel homeViewModel;
     private List<Proposition> propositionList;
+    private Proposition proposition;
     private DatabaseReference mDbPropositions;
 
     public HomeFragment(){
@@ -83,8 +88,24 @@ public class HomeFragment extends Fragment {
                 for (DataSnapshot postSnapshot:snapshot.getChildren()) {
                     Proposition proposition = postSnapshot.getValue(Proposition.class);
                     assert proposition != null;
-                    propositionList.add(0,proposition);
-                    Log.e("Get Date", proposition.getId());
+
+                    boolean flag = true;
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+                    try {
+                        Date date = simpleDateFormat.parse(proposition.getValidDay());
+                        if (date.before(Calendar.getInstance().getTime())){
+                            // already past the valid day
+                            flag = false;
+                        }
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+
+                    if (proposition.getTaker() == null && flag){
+                        propositionList.add(0,proposition);
+                        Log.e("Get Date", proposition.getId());
+                    }
+
                 }
                 propositionAdapter.notifyDataSetChanged();
             }
@@ -113,6 +134,7 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                Collections.sort(propositionList);
                 propositionAdapter.notifyDataSetChanged();
             }
 
@@ -190,7 +212,7 @@ public class HomeFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PROP_CRE) {
             if (resultCode == AddPropositionActivity.CRE_OK){
-                Proposition proposition = JSONModel.deserialize(data.getStringExtra(CREATE),Proposition.class);
+                proposition = JSONModel.deserialize(data.getStringExtra(CREATE),Proposition.class);
                 if (proposition != null){
                     Log.d("postedDay",proposition.getPostedDay());
                     mDbPropositions.child(proposition.getId()).setValue(proposition).addOnSuccessListener(new OnSuccessListener<Void>() {

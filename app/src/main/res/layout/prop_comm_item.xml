@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="10dp"
+    android:id="@+id/ll_prop_item"
     android:background="#17C3B3">
 
     <TextView

@@ -1,6 +1,9 @@
 package com.example.donpoly.ui.home;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.Gravity;
@@ -10,18 +13,31 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.example.donpoly.R;
 import com.example.donpoly.data.model.Proposition;
 import com.example.donpoly.data.tools.JSONModel;
+import com.example.donpoly.ui.login.LoginActivity;
 import com.example.donpoly.ui.messages.MessagesFragment;
 import com.example.donpoly.ui.profile.ShowPropositionActivity;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 public class ShowPolyDetailActivity extends AppCompatActivity {
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,24 +80,64 @@ public class ShowPolyDetailActivity extends AppCompatActivity {
                 status.setText(R.string.status_0);
                 break;
         }
-        description.setText(proposition.getDescription());
+        description.setText(proposition.getDescription().toUpperCase());
         price.setText(String.valueOf(proposition.getPrice()));
-
         // get the picture of the poly
-        Glide.with(getApplicationContext()).load(proposition.getImageUrl()).into(picture);
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference("Images").child(proposition.getId());
+        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Glide.with(getApplicationContext()).load(uri).into(picture);
+            }
+        });
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && proposition.getAuthor().equals(user.getUid())){
+            chat.setEnabled(false);
+            buy.setEnabled(false);
+            chat.setTextColor(R.color.gray);
+            buy.setBackground(getDrawable(R.color.gray));
+        }
 
         chat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent1 = new Intent(ShowPolyDetailActivity.this, MessagesFragment.class);
-                intent1.putExtra("visitUserId",proposition.getAuthor());
-                startActivity(intent1);
+                if (user == null){
+                    Toast.makeText(ShowPolyDetailActivity.this,"Vous devez vous connecter.",Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(ShowPolyDetailActivity.this, LoginActivity.class));
+                }else {
+                    Intent intent1 = new Intent(ShowPolyDetailActivity.this, MessagesFragment.class);
+                    intent1.putExtra("visitUserId",proposition.getAuthor());
+                    startActivity(intent1);
+                }
+                finish();
             }
         });
 
         buy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (user == null){
+                    Toast.makeText(ShowPolyDetailActivity.this,"Vous devez vous connecter.",Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(ShowPolyDetailActivity.this, LoginActivity.class));
+                }else {
+                    proposition.setTaker(user.getUid());
+                    FirebaseDatabase.getInstance(getString(R.string.database_path)).getReference()
+                            .child("propositions").child(proposition.getId())
+                            .setValue(proposition).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @RequiresApi(api = Build.VERSION_CODES.M)
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Toast.makeText(ShowPolyDetailActivity.this,"Commande ajoutée avec succès ",Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(ShowPolyDetailActivity.this,"Echec lors de l'achète de cette polycopié \n",Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+                finish();
 
             }
         });

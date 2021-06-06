@@ -11,7 +11,6 @@
         android:id="@+id/iv_photo_profile"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:src="@drawable/photo"
         android:layout_gravity="center"
         android:layout_marginTop="10dp" />
 

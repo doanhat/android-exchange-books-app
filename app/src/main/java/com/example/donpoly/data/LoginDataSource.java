@@ -40,13 +40,15 @@ public class LoginDataSource {
                         name = user.getDisplayName();
                         email = user.getEmail();
                         imageUri = user.getPhotoUrl();
-                    }else {
-                        // user login failed
-                        return;
                     }
                 }
-        });
-            return new Result.Success<>(new LoggedInUser(id,name,email,imageUri,new ArrayList<>(),new ArrayList<>()));
+            });
+            if (id != ""){
+                return new Result.Success<>(new LoggedInUser(id,name,email,imageUri,new ArrayList<>(),new ArrayList<>()));
+            }else {
+                return new Result.Error(new IOException("Error logging in", new Exception()));
+            }
+
         } catch (Exception e) {
             return new Result.Error(new IOException("Error logging in", e));
 

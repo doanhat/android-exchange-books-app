@@ -13,21 +13,22 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DonPoly">
-        <activity android:name=".ui.messages.MessageActivity"></activity>
+        <activity android:name=".ui.messages.MessageActivity"/>
         <activity
             android:name=".ui.home.ShowPolyDetailActivity"
             android:label=""
-            android:theme="@style/DialogStyle"></activity>
+            android:theme="@style/DialogStyle"/>
         <activity android:name=".ui.login.RegisterActivity" />
         <activity android:name=".ui.home.AddPropositionActivity" />
         <activity
             android:name=".ui.profile.ShowPropositionActivity"
             android:label=""
-            android:theme="@style/DialogStyle" />
+            android:theme="@style/DialogStyle"/>
         <activity android:name=".ui.profile.MyPropositionActivity" />
         <activity
             android:name=".ui.login.LoginActivity"
-            android:label="@string/title_activity_login" />
+            android:label="@string/title_activity_login"
+            android:permission="android.permission.INTERNET"/>
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name">
@@ -37,6 +38,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+<!--        <service-->
+<!--            android:name=".FirebaseIDService"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>-->
+<!--            </intent-filter>-->
+<!--        </service>-->
     </application>
+
 
 </manifest>

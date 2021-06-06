@@ -1,9 +1,11 @@
 package adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,6 +14,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.donpoly.R;
 import com.example.donpoly.data.model.Proposition;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.ViewHolder> {
@@ -31,9 +37,21 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.prop_comm_item, parent, false));
     }
 
+    @SuppressLint("ResourceAsColor")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Proposition proposition = propositionList.get(position);
+
+        // if the valid day is already past, the background color turns to gray
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            Date date = simpleDateFormat.parse(proposition.getValidDay());
+            if (date.before(Calendar.getInstance().getTime())){
+                holder.linearLayout.setBackgroundColor(R.color.gray);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         holder.poly.setText(proposition.getTitle());
         holder.date.setText(proposition.getPostedDay());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -50,11 +68,13 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
+        public LinearLayout linearLayout;
         public TextView poly;
         public TextView date;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            linearLayout = itemView.findViewById(R.id.ll_prop_item);
             poly = itemView.findViewById(R.id.tv_poly_item);
             date = itemView.findViewById(R.id.tv_date_item);
         }

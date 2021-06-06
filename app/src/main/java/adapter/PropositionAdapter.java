@@ -2,6 +2,7 @@ package adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,9 @@ import com.example.donpoly.data.model.Proposition;
 import com.example.donpoly.data.tools.JSONModel;
 import com.example.donpoly.ui.home.ShowPolyDetailActivity;
 import com.example.donpoly.ui.profile.ShowPropositionActivity;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,8 +60,14 @@ public class PropositionAdapter extends RecyclerView.Adapter<PropositionAdapter.
         Proposition proposition = mFilterList.get(position);
 
         // Set item views based on your views and data model
-        Glide.with(context).load(proposition.getImageUrl()).into(holder.prop_image);
-        holder.prop_title.setText(proposition.getTitle());
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference("Images").child(proposition.getId());
+        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Glide.with(context).load(uri).into(holder.prop_image);
+            }
+        });
+        holder.prop_title.setText(proposition.getTitle().toUpperCase());
         holder.prop_price.setText(String.valueOf(proposition.getPrice()));
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,7 +89,7 @@ public class PropositionAdapter extends RecyclerView.Adapter<PropositionAdapter.
         return new Filter() {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
-                String charString = constraint.toString();
+                String charString = constraint.toString().toUpperCase();
                 if (charString.isEmpty()){
                     // no content to filter, we use the original data
                     mFilterList = mSourceList;

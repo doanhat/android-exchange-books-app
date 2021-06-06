@@ -3,6 +3,7 @@ package com.example.donpoly.ui.login;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -44,9 +45,14 @@ public class LoginActivity extends AppCompatActivity {
         final Button signUpButton = findViewById(R.id.sign_up);
         final ProgressBar loadingProgressBar = findViewById(R.id.loading);
 
-        usernameEditText.setText(getSharedPreferences("login", Context.MODE_PRIVATE).getString("username",""));
-        passwordEditText.setText(getSharedPreferences("login", Context.MODE_PRIVATE).getString("password",""));
-        loginViewModel.loginDataChanged(usernameEditText.getText().toString(),passwordEditText.getText().toString());
+        String username = getSharedPreferences("login", Context.MODE_PRIVATE).getString("username","");
+        String password = getSharedPreferences("login", Context.MODE_PRIVATE).getString("password","");
+        if (username != "" && password != ""){
+            usernameEditText.setText(username);
+            passwordEditText.setText(password);
+            loginViewModel.loginDataChanged(username,password);
+        }
+
 
         loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {
             @Override
@@ -79,7 +85,7 @@ public class LoginActivity extends AppCompatActivity {
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     startActivity(intent);
 
-                    updateUiWithUser(loginResult.getSuccess());
+                    //updateUiWithUser(loginResult.getSuccess());
                 }
                 setResult(Activity.RESULT_OK);
 
@@ -155,6 +161,10 @@ public class LoginActivity extends AppCompatActivity {
                 loadingProgressBar.setVisibility(View.VISIBLE);
                 loginViewModel.login(usernameEditText.getText().toString(),
                         passwordEditText.getText().toString());
+                SharedPreferences.Editor editor = getSharedPreferences("login", Context.MODE_PRIVATE).edit();
+                editor.putString("username",usernameEditText.getText().toString());
+                editor.putString("password",passwordEditText.getText().toString());
+                editor.commit();
             }
         });
 

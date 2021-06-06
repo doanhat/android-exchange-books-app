@@ -1,7 +1,6 @@
 package com.example.donpoly.ui.login;
 
 import android.app.ProgressDialog;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -23,13 +22,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.donpoly.R;
 import com.example.donpoly.data.model.User;
+import com.example.donpoly.data.tools.FirebaseController;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -128,7 +131,8 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void signUp(String userEmail,String userPwd) {
 
-        FirebaseAuth.getInstance().createUserWithEmailAndPassword(userEmail, userPwd).addOnCompleteListener(this,new OnCompleteListener<AuthResult>() {
+        FirebaseAuth.getInstance().createUserWithEmailAndPassword(userEmail, userPwd)
+                .addOnCompleteListener(this,new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()){
@@ -160,33 +164,10 @@ public class RegisterActivity extends AppCompatActivity {
                     });
 
 
-                    // set the image uri of the current user
-                    if (imageUri != null){
-                        Toast.makeText(RegisterActivity.this,imageUri.toString(),Toast.LENGTH_SHORT).show();
-                        profileUpdates = new UserProfileChangeRequest.Builder().setPhotoUri(imageUri).build();
-                    }else {
-                        profileUpdates = new UserProfileChangeRequest.Builder()
-                                .setPhotoUri(Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE
-                                                + "://"+getResources().getResourcePackageName(R.drawable.profile)
-                                                + "/" + getResources().getResourceTypeName(R.drawable.profile)
-                                                + "/" + getResources().getResourceEntryName(R.drawable.profile)))
-                                        .build();
-                    }
-
-                    user.updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()){
-                                Log.d(TAG, "User profile updated");
-                            }else {
-                                Log.d(TAG,"failed to add a photo for user");
-                            }
-                        }
-                    });
-
-
                     // create a user model
-                    User user1 = new User(user.getUid(),userEmail,imageUri);
+                    User user1 = new User();
+                    user1.setName(mName.getText().toString());
+                    user1.setUid(user.getUid());
                     final StorageReference storageReference= FirebaseStorage.getInstance().getReference().child("users").child(user.getUid());
                     UploadTask uploadTask = storageReference.putFile(imageUri);
                     Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
@@ -212,6 +193,25 @@ public class RegisterActivity extends AppCompatActivity {
                         }
                     });
 
+                    FirebaseController firebaseController = new FirebaseController("users");
+                    DatabaseReference mDbUsers = firebaseController.getReferences().get("users");
+                    mDbUsers.child(user1.getUid()).setValue(user1).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            // after the data addition is successful
+                            // we are displaying a success toast message.
+                            mLoadingBar.dismiss();
+                            finish();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            // this method is called when the data addition process is failed.
+                            // displaying a toast message when data addition is failed.
+                            Toast.makeText(RegisterActivity.this, "Echec lors de l'ajoute de l'Utilisateur \n" + e, Toast.LENGTH_SHORT).show();
+                            mLoadingBar.dismiss();
+                        }
+                    });
 
 
 
@@ -222,8 +222,10 @@ public class RegisterActivity extends AppCompatActivity {
                     editor.putString("password",mPwd.getText().toString());
                     editor.commit();
                     startActivity(new Intent(RegisterActivity.this,LoginActivity.class));
+                    finish();
                 }else{
                     Toast.makeText(RegisterActivity.this,"Account creation failed", Toast.LENGTH_SHORT).show();
+                    mLoadingBar.dismiss();
                 }
             }
         });

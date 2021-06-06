@@ -3,6 +3,7 @@ package com.example.donpoly.ui.messages;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -45,7 +47,6 @@ public class MessageActivity extends AppCompatActivity {
     Button sendBtn;
 
     FirebaseUser fuser = FirebaseAuth.getInstance().getCurrentUser();
-    DatabaseReference reference;
     Intent intent;
     MessageAdapter messageAdapter;
     List<Chat> mchat;
@@ -57,6 +58,9 @@ public class MessageActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
         this.setTitle("Chat");
+
+        ActionBar mActionBar = getSupportActionBar();
+        mActionBar.setDisplayHomeAsUpEnabled(true);
 
         imageView=findViewById(R.id.imageview_profile);
         username=findViewById(R.id.username);
@@ -124,6 +128,9 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
         //adding user to chat fragment latest chats with contacts
+        Long tsLong = System.currentTimeMillis()/1000;
+        String ts = tsLong.toString();
+
         DatabaseReference mDbChatsList = FirebaseDatabase.getInstance(getString(R.string.database_path))
                 .getReference().child("ChatList").child(fuser.getUid()).child(userid);
         mDbChatsList.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -132,6 +139,7 @@ public class MessageActivity extends AppCompatActivity {
                 if(!snapshot.exists()){
                     mDbChatsList.child("id").setValue(userid);
                 }
+                mDbChatsList.child("recentTime").setValue(ts);
             }
 
             @Override
@@ -147,6 +155,9 @@ public class MessageActivity extends AppCompatActivity {
                 if(!snapshot.exists()){
                     mDbChatsList2.child("id").setValue(fuser.getUid());
                 }
+                mDbChatsList2.child("unread").setValue("true");
+                mDbChatsList2.child("recentTime").setValue(ts);
+
             }
 
             @Override
@@ -175,6 +186,22 @@ public class MessageActivity extends AppCompatActivity {
                     messageAdapter=new MessageAdapter(MessageActivity.this,mchat,imageurl);
                     recyclerView.setAdapter(messageAdapter);
                 }
+
+                DatabaseReference mDbChatList = FirebaseDatabase.getInstance(getString(R.string.database_path))
+                        .getReference().child("ChatList").child(fuser.getUid()).child(userid);
+                mDbChatList.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.exists()){
+                            mDbChatList.child("unread").setValue("false");
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
             }
 
             @Override
@@ -182,5 +209,16 @@ public class MessageActivity extends AppCompatActivity {
                 // Getting Post failed, log a message
             }
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                this.finish();
+                return false;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
