@@ -53,7 +53,6 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
             e.printStackTrace();
         }
         holder.poly.setText(proposition.getTitle());
-        holder.date.setText(proposition.getPostedDay());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -70,13 +69,11 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     public class ViewHolder extends RecyclerView.ViewHolder {
         public LinearLayout linearLayout;
         public TextView poly;
-        public TextView date;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             linearLayout = itemView.findViewById(R.id.ll_prop_item);
             poly = itemView.findViewById(R.id.tv_poly_item);
-            date = itemView.findViewById(R.id.tv_date_item);
         }
     }
 

@@ -1,6 +1,7 @@
 package com.example.donpoly.ui.messages;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -13,13 +14,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.donpoly.R;
 import com.example.donpoly.data.model.Chat;
+import com.example.donpoly.data.tools.FirebaseController;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,8 +29,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -47,25 +50,44 @@ public class MessageActivity extends AppCompatActivity {
     Button sendBtn;
 
     FirebaseUser fuser = FirebaseAuth.getInstance().getCurrentUser();
+    DatabaseReference reference;
     Intent intent;
     MessageAdapter messageAdapter;
     List<Chat> mchat;
     String userid;
+    String textToSend;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_message);
-        this.setTitle("Chat");
 
-        ActionBar mActionBar = getSupportActionBar();
-        mActionBar.setDisplayHomeAsUpEnabled(true);
-
-        imageView=findViewById(R.id.imageview_profile);
+//        imageView=findViewById(R.id.imageview_profile);
         username=findViewById(R.id.username);
         sendBtn=findViewById(R.id.btn_send);
         editText=findViewById(R.id.text_send);
+//
+//        ActionBar mActionBar = getSupportActionBar();
+//        mActionBar.setDisplayHomeAsUpEnabled(true);
+//        mActionBar.setTitle(fuser.getDisplayName());
+
+
+
+
+        //toolbar
+        Toolbar toolbar=findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                Intent intent = new Intent(MessageActivity.this, MessagesFragment.class);
+                startActivity(intent);
+            }
+        });
+
+
 
         //RecyclerView
         recyclerView=findViewById(R.id.recycler_view);
@@ -76,15 +98,31 @@ public class MessageActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
         intent=getIntent();
         userid=intent.getStringExtra("visitUserId");
-        DatabaseReference mDbUsers = FirebaseDatabase.getInstance(getString(R.string.database_path))
-                .getReference().child("users").child(userid);
+        //if it is to send a proposition taken message
+        textToSend=intent.getStringExtra("TextToSend");
+
+        // set the image of user
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference("users").child(userid);
+        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+//                Glide.with(getApplicationContext()).load(uri).into(imageView);
+            }
+        });
+
+
+        if(textToSend!=null){
+            sendMessage(fuser.getUid(),userid,textToSend);
+        }
+        FirebaseController firebaseController = new FirebaseController("users");
+        DatabaseReference mDbUsers = firebaseController.getReferences().get("users").child(userid);
         mDbUsers.addValueEventListener(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 username.setText(snapshot.child("name").getValue().toString());
-                //Glide.with(MessageActivity.this).load(snapshot.child("imageurl").getValue().toString()).into(imageView);
-                imageView.setImageResource(R.drawable.profile);
+
+//                getSupportActionBar().setTitle(snapshot.child("name").getValue().toString());
 
                 readMessager(fuser.getUid(),userid,"default");
             }
@@ -107,9 +145,11 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
     }
+
+
     private void sendMessage(String sender,String receiver,String message){
-        DatabaseReference mDbUsers = FirebaseDatabase.getInstance(getString(R.string.database_path))
-                .getReference().child("chats");
+        FirebaseController firebaseController = new FirebaseController("chats");
+        DatabaseReference mDbUsers = firebaseController.getReferences().get("chats");
         String currentDateandTime = new SimpleDateFormat("MM-dd HH:mm").format(new Date());
         HashMap<String,Object> hashMap =new HashMap<>();
         hashMap.put("sender",sender);
@@ -130,17 +170,14 @@ public class MessageActivity extends AppCompatActivity {
         //adding user to chat fragment latest chats with contacts
         Long tsLong = System.currentTimeMillis()/1000;
         String ts = tsLong.toString();
-
-        DatabaseReference mDbChatsList = FirebaseDatabase.getInstance(getString(R.string.database_path))
-                .getReference().child("ChatList").child(fuser.getUid()).child(userid);
+        FirebaseController firebaseController2 = new FirebaseController("ChatList");
+        DatabaseReference mDbChatsList = firebaseController2.getReferences().get("ChatList").child(fuser.getUid()).child(userid);
         mDbChatsList.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(!snapshot.exists()){
                     mDbChatsList.child("id").setValue(userid);
-                    mDbChatsList.child("unread").setValue("false");
                 }
-
                 mDbChatsList.child("recentTime").setValue(ts);
             }
 
@@ -149,8 +186,7 @@ public class MessageActivity extends AppCompatActivity {
 
             }
         });
-        DatabaseReference mDbChatsList2 = FirebaseDatabase.getInstance(getString(R.string.database_path))
-                .getReference().child("ChatList").child(userid).child(fuser.getUid());
+        DatabaseReference mDbChatsList2 = firebaseController2.getReferences().get("ChatList").child(userid).child(fuser.getUid());
         mDbChatsList2.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -159,7 +195,6 @@ public class MessageActivity extends AppCompatActivity {
                 }
                 mDbChatsList2.child("unread").setValue("true");
                 mDbChatsList2.child("recentTime").setValue(ts);
-
             }
 
             @Override
@@ -172,8 +207,8 @@ public class MessageActivity extends AppCompatActivity {
     }
     private void readMessager(String myid,String userid,String imageurl){
         mchat=new ArrayList<>();
-        DatabaseReference mDbChats = FirebaseDatabase.getInstance(getString(R.string.database_path))
-                .getReference().child("chats");
+        FirebaseController firebaseController = new FirebaseController("chats");
+        DatabaseReference mDbChats = firebaseController.getReferences().get("chats");
         mDbChats.addValueEventListener(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
@@ -188,14 +223,13 @@ public class MessageActivity extends AppCompatActivity {
                     messageAdapter=new MessageAdapter(MessageActivity.this,mchat,imageurl);
                     recyclerView.setAdapter(messageAdapter);
                 }
-
-                DatabaseReference mDbChatList = FirebaseDatabase.getInstance(getString(R.string.database_path))
-                        .getReference().child("ChatList").child(fuser.getUid()).child(userid);
-                mDbChatList.addListenerForSingleValueEvent(new ValueEventListener() {
+                FirebaseController firebaseController4 = new FirebaseController("ChatList");
+                DatabaseReference mDbChatsList3 = firebaseController4.getReferences().get("ChatList").child(fuser.getUid()).child(userid);
+                mDbChatsList3.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         if(snapshot.exists()){
-                            mDbChatList.child("unread").setValue("false");
+                            mDbChatsList3.child("unread").setValue("false");
                         }
                     }
 
@@ -217,16 +251,12 @@ public class MessageActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                Intent intent = new Intent(this, MessagesFragment.class);
-                startActivity(intent);
+                this.finish();
                 return false;
             default:
-                Intent intent2 = new Intent(this, MessagesFragment.class);
-                startActivity(intent2);
                 return super.onOptionsItemSelected(item);
         }
-
     }
-//
-
 }
+
+

@@ -58,7 +58,6 @@ public class MessagesFragment extends Fragment {
             startActivity(new Intent(getContext(), LoginActivity.class));
         }
 
-
         usersList = new ArrayList<>();
         FirebaseController firebaseController2 = new FirebaseController("ChatList");
         DatabaseReference mDbChatsList = firebaseController2.getReferences().get("ChatList");
@@ -92,9 +91,8 @@ public class MessagesFragment extends Fragment {
                         usersList.add(chatlist);
                     }
                     Collections.reverse(usersList);
-                    //chatList();
-                    //getting all recent chats;
 
+                    //getting all recent chats;
                     FirebaseController firebaseController3 = new FirebaseController("users");
                     DatabaseReference mDbUsers = firebaseController3.getReferences().get("users");
                     mDbUsers.addValueEventListener(new ValueEventListener() {
@@ -130,9 +128,5 @@ public class MessagesFragment extends Fragment {
         return view;
     }
 
-    private void chatList(){
 
-
-
-    }
 }

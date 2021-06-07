@@ -1,6 +1,7 @@
 package adapter;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,15 +11,19 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.donpoly.R;
 import com.example.donpoly.data.model.User;
 import com.example.donpoly.data.tools.FirebaseController;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.List;
 
@@ -48,6 +53,16 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         }else{
             Glide.with(context).load(user.getImageurl()).into(holder.imageView);
         }*/
+
+        // set the image of user
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference("users").child(user.getUid());
+        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Glide.with(context).load(uri).into(holder.imageView);
+            }
+        });
+
         //unread message
         FirebaseUser fuser = FirebaseAuth.getInstance().getCurrentUser();
         FirebaseController firebaseController2 = new FirebaseController("ChatList");
@@ -58,9 +73,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()){
                     String flagUnread=(String) snapshot.child(user.getUid()).child("unread").getValue();
-                    if(flagUnread.equals("true")){
-                        holder.imageViewUnread.setVisibility(View.VISIBLE);
+                    if (flagUnread != null){
+                        if(flagUnread.equals("true")){
+                            holder.imageViewUnread.setVisibility(View.VISIBLE);
+                        }
                     }
+
                 }
             }
 

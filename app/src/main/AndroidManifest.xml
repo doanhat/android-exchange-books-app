@@ -13,7 +13,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DonPoly">
-        <activity android:name=".ui.messages.MessageActivity"/>
+        <activity android:name=".ui.messages.MessageActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <activity
             android:name=".ui.home.ShowPolyDetailActivity"
             android:label=""
