@@ -24,7 +24,7 @@ import com.example.donpoly.R;
 import com.example.donpoly.data.model.Proposition;
 import com.example.donpoly.data.tools.JSONModel;
 import com.example.donpoly.ui.login.LoginActivity;
-import com.example.donpoly.ui.messages.MessagesFragment;
+import com.example.donpoly.ui.messages.MessageActivity;
 import com.example.donpoly.ui.profile.ShowPropositionActivity;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -106,7 +106,7 @@ public class ShowPolyDetailActivity extends AppCompatActivity {
                     Toast.makeText(ShowPolyDetailActivity.this,"Vous devez vous connecter.",Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(ShowPolyDetailActivity.this, LoginActivity.class));
                 }else {
-                    Intent intent1 = new Intent(ShowPolyDetailActivity.this, MessagesFragment.class);
+                    Intent intent1 = new Intent(ShowPolyDetailActivity.this, MessageActivity.class);
                     intent1.putExtra("visitUserId",proposition.getAuthor());
                     startActivity(intent1);
                 }

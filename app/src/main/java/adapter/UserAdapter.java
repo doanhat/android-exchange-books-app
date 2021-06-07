@@ -36,7 +36,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view= LayoutInflater.from(context).inflate(R.layout.user_item,parent,false);
-        return new ViewHolder(view);
+        return new UserAdapter.ViewHolder(view);
     }
 
     @Override
@@ -48,7 +48,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         }else{
             Glide.with(context).load(user.getImageurl()).into(holder.imageView);
         }*/
-
+        //unread message
         FirebaseUser fuser = FirebaseAuth.getInstance().getCurrentUser();
         FirebaseController firebaseController2 = new FirebaseController("ChatList");
         DatabaseReference mDbChatsList = firebaseController2.getReferences().get("ChatList");
@@ -69,7 +69,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
             }
         });
-
     }
 
     @Override

@@ -17,4 +17,5 @@ public class Chatlist {
     public void setId(String id) {
         this.id = id;
     }
+
 }

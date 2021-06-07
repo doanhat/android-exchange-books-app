@@ -138,7 +138,9 @@ public class MessageActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(!snapshot.exists()){
                     mDbChatsList.child("id").setValue(userid);
+                    mDbChatsList.child("unread").setValue("false");
                 }
+
                 mDbChatsList.child("recentTime").setValue(ts);
             }
 
@@ -215,10 +217,16 @@ public class MessageActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                this.finish();
+                Intent intent = new Intent(this, MessagesFragment.class);
+                startActivity(intent);
                 return false;
             default:
+                Intent intent2 = new Intent(this, MessagesFragment.class);
+                startActivity(intent2);
                 return super.onOptionsItemSelected(item);
         }
+
     }
+//
+
 }

@@ -5,12 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,6 +20,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.donpoly.R;
@@ -43,7 +47,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText mEmail, mPwd, mName;
     private ProgressDialog mLoadingBar;
 
-    private boolean result = false;
+    private static boolean result = false;
     private static Uri imageUri;
 
 
@@ -51,6 +55,9 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+
+        ActionBar mActionBar = getSupportActionBar();
+        mActionBar.setDisplayHomeAsUpEnabled(true);
 
         // init view
         mEmail = findViewById(R.id.email);
@@ -87,15 +94,18 @@ public class RegisterActivity extends AppCompatActivity {
         mPwd.addTextChangedListener(textWatcher);
 
         mBtn.setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onClick(View view) {
-                if (result){
-                    mLoadingBar.setTitle("Créer un nouveau compte");
-                    mLoadingBar.setMessage("Veuillez patienter...");
-                    mLoadingBar.setCanceledOnTouchOutside(true);
-                    mLoadingBar.show();
+                if (mImage.getTag().equals("unSelect")) {
+                    Toast.makeText(RegisterActivity.this, "Choisisez un image", Toast.LENGTH_SHORT).show();
+                }else if (result){
+                        mLoadingBar.setTitle("Créer un nouveau compte");
+                        mLoadingBar.setMessage("Veuillez patienter...");
+                        mLoadingBar.setCanceledOnTouchOutside(true);
+                        mLoadingBar.show();
 
-                    signUp(mEmail.getText().toString(),mPwd.getText().toString());
+                        signUp(mEmail.getText().toString(),mPwd.getText().toString());
                 }
             }
         });
@@ -238,6 +248,18 @@ public class RegisterActivity extends AppCompatActivity {
         if (requestCode == 10 && resultCode == RESULT_OK) {
             imageUri = data.getData();
             mImage.setImageURI(data.getData());
+            mImage.setTag("select");
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                this.finish();
+                return false;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 

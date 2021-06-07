@@ -14,13 +14,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
-import com.example.donpoly.data.LoginDataSource;
-import com.example.donpoly.data.LoginRepository;
 import com.example.donpoly.ui.home.HomeFragment;
 import com.example.donpoly.ui.login.LoginActivity;
 import com.example.donpoly.ui.messages.MessagesFragment;
 import com.example.donpoly.ui.profile.ProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,13 +41,20 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initView();
+
         initData();
+        initView();
     }
 
     private void initData() {
         sharedPreferences = getSharedPreferences("login", Context.MODE_PRIVATE);
-        isLogin = LoginRepository.getInstance(new LoginDataSource()).isLoggedIn();
+//        isLogin = LoginRepository.getInstance(new LoginDataSource()).isLoggedIn();
+//        Toast.makeText(MainActivity.this, FirebaseAuth.getInstance().getCurrentUser().getUid(),Toast.LENGTH_SHORT).show();
+        if (FirebaseAuth.getInstance().getCurrentUser() == null){
+            isLogin = false;
+        }else {
+            isLogin = true;
+        }
 //        createNotificationChannel();
     }
 
@@ -106,8 +112,8 @@ public class MainActivity extends AppCompatActivity {
                             mViewPager.setCurrentItem(1);
                             return true;
                         }else {
-                            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                            startActivity(intent);
+//                            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+//                            startActivity(intent);
                             return false;
                         }
                     case R.id.navigation_profil:

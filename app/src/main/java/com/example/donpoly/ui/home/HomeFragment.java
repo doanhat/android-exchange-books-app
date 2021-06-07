@@ -107,6 +107,7 @@ public class HomeFragment extends Fragment {
                     }
 
                 }
+
                 propositionAdapter.notifyDataSetChanged();
             }
 
