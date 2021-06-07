@@ -67,13 +67,6 @@ public class MessageActivity extends AppCompatActivity {
         username=findViewById(R.id.username);
         sendBtn=findViewById(R.id.btn_send);
         editText=findViewById(R.id.text_send);
-//
-//        ActionBar mActionBar = getSupportActionBar();
-//        mActionBar.setDisplayHomeAsUpEnabled(true);
-//        mActionBar.setTitle(fuser.getDisplayName());
-
-
-
 
         //toolbar
         Toolbar toolbar=findViewById(R.id.toolbar);

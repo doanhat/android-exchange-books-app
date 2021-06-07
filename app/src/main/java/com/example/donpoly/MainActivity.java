@@ -17,6 +17,7 @@ import com.example.donpoly.ui.messages.MessagesFragment;
 import com.example.donpoly.ui.profile.ProfileFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private MenuItem mMenuItem;
     private SharedPreferences sharedPreferences;
     private Boolean isLogin;
-//    private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     private final static String CHANNEL_ID = "0";
 
     @Override
@@ -49,9 +50,12 @@ public class MainActivity extends AppCompatActivity {
 //        NavigationUI.setupWithNavController(navView, navController);
 
 
-
-        initData();
-        initView();
+        if (user == null){
+            startActivity(new Intent(MainActivity.this,LoginActivity.class));
+        }else {
+            initData();
+            initView();
+        }
     }
 
     private void initData() {

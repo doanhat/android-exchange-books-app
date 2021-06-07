@@ -5,16 +5,22 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class RecyclerItemClickListener implements RecyclerView.OnItemTouchListener {
     private OnItemClickListener mListener;
-    GestureDetector mGestureDetector;
 
     public RecyclerItemClickListener() {
 
     }
+
+    public interface OnItemClickListener {
+        void onItemClick(View view, int position);
+
+        void onLongItemClick(View view, int position);
+    }
+
+    GestureDetector mGestureDetector;
 
     public RecyclerItemClickListener(Context context, final RecyclerView recyclerView, OnItemClickListener listener) {
         mListener = listener;
@@ -34,30 +40,17 @@ public class RecyclerItemClickListener implements RecyclerView.OnItemTouchListen
         });
     }
 
-
-    @Override
-    public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-        View childView = rv.findChildViewUnder(e.getX(), e.getY());
+    @Override public boolean onInterceptTouchEvent(RecyclerView view, MotionEvent e) {
+        View childView = view.findChildViewUnder(e.getX(), e.getY());
         if (childView != null && mListener != null && mGestureDetector.onTouchEvent(e)) {
-            mListener.onItemClick(childView, rv.getChildAdapterPosition(childView));
+            mListener.onItemClick(childView, view.getChildAdapterPosition(childView));
             return true;
         }
-
         return false;
     }
 
-    @Override
-    public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-
-    }
+    @Override public void onTouchEvent(RecyclerView view, MotionEvent motionEvent) { }
 
     @Override
-    public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-    }
-
-    public interface OnItemClickListener{
-        void onItemClick(View view, int position);
-        void onLongItemClick(View view, int position);
-    }
+    public void onRequestDisallowInterceptTouchEvent (boolean disallowIntercept){}
 }

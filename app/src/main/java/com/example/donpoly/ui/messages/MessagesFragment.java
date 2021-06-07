@@ -17,7 +17,6 @@ import com.example.donpoly.R;
 import com.example.donpoly.data.model.Chatlist;
 import com.example.donpoly.data.model.User;
 import com.example.donpoly.data.tools.FirebaseController;
-import com.example.donpoly.ui.login.LoginActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -50,14 +49,7 @@ public class MessagesFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recycler_view2);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        userAdapter=new UserAdapter(getContext(),mUsers=new ArrayList<>());
-        recyclerView.setAdapter(userAdapter);
-
         fuser = FirebaseAuth.getInstance().getCurrentUser();
-        if (fuser == null){
-            startActivity(new Intent(getContext(), LoginActivity.class));
-        }
-
         usersList = new ArrayList<>();
         FirebaseController firebaseController2 = new FirebaseController("ChatList");
         DatabaseReference mDbChatsList = firebaseController2.getReferences().get("ChatList");
@@ -76,57 +68,59 @@ public class MessagesFragment extends Fragment {
 
             }
         }));
-        if (fuser != null){
-            Query orderRef=mDbChatsList.child(fuser.getUid()).orderByChild("recentTime");
-//            Query orderRef=mDbChatsList.child(LoginRepository.getInstance(new LoginDataSource()).getLoggedInUser().getUserId()).orderByChild("recentTime");
+        Query orderRef=mDbChatsList.child(fuser.getUid()).orderByChild("recentTime");
+        ValueEventListener valueEventListener= new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-            orderRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    usersList.clear();
-                    //loop for all users
-                    for (DataSnapshot snapshotItem : snapshot.getChildren()) {
-                        Chatlist chatlist = snapshotItem.getValue(Chatlist.class);
-                        Log.d("TAG", chatlist.getId());
-                        usersList.add(chatlist);
-                    }
-                    Collections.reverse(usersList);
-
-                    //getting all recent chats;
-                    FirebaseController firebaseController3 = new FirebaseController("users");
-                    DatabaseReference mDbUsers = firebaseController3.getReferences().get("users");
-                    mDbUsers.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            mUsers.clear();
-                            for(Chatlist chatlist:usersList){
-                                for(DataSnapshot snapshotItem:snapshot.getChildren()) {
-                                    User user = snapshotItem.getValue(User.class);
-                                    if (user.getUid().equals(chatlist.getId())) {
-                                        mUsers.add(user);
-                                        break;
-                                    }
-                                }
-                            }
-                            userAdapter.notifyDataSetChanged();
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
+                usersList.clear();
+                //loop for all users
+                for (DataSnapshot snapshotItem : snapshot.getChildren()) {
+                    Chatlist chatlist = snapshotItem.getValue(Chatlist.class);
+                    Log.d("TAG", chatlist.getId());
+                    usersList.add(chatlist);
                 }
+                Collections.reverse(usersList);
+                chatList();
+            }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
-                }
-            });
-        }
-
+            }
+        };
+        orderRef.addListenerForSingleValueEvent(valueEventListener);
         return view;
     }
 
+    private void chatList(){
+        //getting all recent chats;
+        mUsers=new ArrayList<>();
+        FirebaseController firebaseController3 = new FirebaseController("users");
+        DatabaseReference mDbUsers = firebaseController3.getReferences().get("users");
+        mDbUsers.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                mUsers.clear();
+                for(Chatlist chatlist:usersList){
+                    for(DataSnapshot snapshotItem:snapshot.getChildren()) {
+                        User user = snapshotItem.getValue(User.class);
+                        if (user.getUid().equals(chatlist.getId())) {
+                            mUsers.add(user);
+                            break;
+                        }
+                    }
+                }
+                userAdapter=new UserAdapter(getContext(),mUsers);
+                recyclerView.setAdapter(userAdapter);
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+
+    }
 }
